@@ -1,38 +1,57 @@
 package main
 
 import (
+	"github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-var aBioXml = `<p>Eric Theodore Cartman is one of the main characters in the animated television series <a href="https://en.wikipedia.org/wiki/South_Park">South Park</a>, created by Matt Stone and Trey Parker, and voiced by Trey Parker.</p>`
-var aBio = "Eric Theodore Cartman is one of the main characters in the animated television series South Park ( https://en.wikipedia.org/wiki/South_Park ) , created by Matt Stone and Trey Parker, and voiced by Trey Parker."
-var anIdentifier = identifier{tmeAuthority, "Q0ItMDAwMDkwMA==-QXV0aG8ycw=="}
+var anAuthorUuid = uuid.NewV4()
+var aRoleLabel = "Superhero"
+var anotherRoleLabel = "Rockstar"
+var aJobTitle = "Avengers member"
+var aMembershipUuid = uuid.NewV4()
+var aRoleUuid = uuid.NewV4()
 
 var anAuthor = author{
-	Name:          "Eric Cartman",
-	Email:         "eric.cartman@southpark.cc.com",
-	ImageUrl:      "https://upload.wikimedia.org/wikipedia/en/7/77/EricCartman.png",
-	Biography:     aBioXml,
-	TwitterHandle: "@SouthPark",
-	Uuid:          "4a893fa2-e58b-4c28-aa12-4bb469cd7e57",
-	TmeIdentifier: "Q0ItMDAwMDkwMA==-QXV0aG8ycw==",
+	UUID:           anAuthorUuid,
+	Role:           aRoleLabel,
+	Jobtitle:       aJobTitle,
+	Membershipuuid: aMembershipUuid,
 }
 
-var aPerson = person{
-	Uuid:           "4a893fa2-e58b-4c28-aa12-4bb469cd7e57",
-	Name:           "Eric Cartman",
-	EmailAddress:   "eric.cartman@southpark.cc.com",
-	TwitterHandle:  "@SouthPark",
-	Description:    aBio,
-	DescriptionXML: aBioXml,
-	ImageUrl:       "https://upload.wikimedia.org/wikipedia/en/7/77/EricCartman.png",
-	Identifiers:    []identifier{anIdentifier},
+var anotherAuthor = author{
+	UUID:           uuid.NewV4(),
+	Role:           anotherRoleLabel,
+	Jobtitle:       aJobTitle,
+	Membershipuuid: aMembershipUuid,
+}
+
+var aBerthaRole = bertaRole{
+	UUID:       aRoleUuid,
+	aRoleLabel: aRoleLabel,
+}
+
+var aRoleLabel = map[string]berthaRole{aRoleLabel.aRoleLabel: aBerthaRole}
+
+var aMembership = membership{
+	UUID:                   aMembershipUuid,
+	PrefLabel:              aJobTitle,
+	PersonUUID:             anAuthorUuid,
+	OrganisationUUID:       ftUuid,
+	AlternativeIdentifiers: alternativeIdentifiers{UUIDS: []string{aMembershipUuid}},
+	MembershipRoles:        []membershipRole{membershipRole{RoleUUID: aRoleUuids}},
 }
 
 func TestShouldTransformAuthorToPersonSucessfully(t *testing.T) {
 	transformer := berthaTransformer{}
-	p, err := transformer.authorToPerson(anAuthor)
+	m, err := transformer.toMembership(anAuthor, aRolesMap)
 	assert.Nil(t, err)
-	assert.Equal(t, aPerson, p, "The author")
+	assert.Equal(t, aMembership, m, "The membership is transformed properly")
+}
+
+func TestShouldReturnErrorWhenRoleIsNotFound(t *testing.T) {
+	transformer := berthaTransformer{}
+	m, err := transformer.toMembership(anotherAuthor, aRolesMap)
+	assert.NotNil(t, err)
 }
