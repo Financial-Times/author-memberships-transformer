@@ -23,19 +23,25 @@ func main() {
 		Desc:   "Port to listen on",
 		EnvVar: "PORT",
 	})
-	berthaSrcUrl := app.String(cli.StringOpt{
-		Name:   "bertha-source-url",
+	berthaAuthorsSrcUrl := app.String(cli.StringOpt{
+		Name:   "bertha-authors-source-url",
 		Value:  "{url}",
 		Desc:   "The URL of the Bertha Authors JSON source",
-		EnvVar: "BERTHA_SOURCE_URL",
+		EnvVar: "BERTHA_AUTHORS_SOURCE_URL",
+	})
+	berthaRolesSrcUrl := app.String(cli.StringOpt{
+		Name:   "bertha-roles-source-url",
+		Value:  "{url}",
+		Desc:   "The URL of the Bertha Roles JSON source",
+		EnvVar: "BERTHA_ROLES_SOURCE_URL",
 	})
 
 	app.Action = func() {
 		log.Info("App started!!!")
-		bs := &berthaService{berthaUrl: *berthaSrcUrl}
-		ah := newAuthorHandler(bs)
+		bs := newBerthaService(*berthaAuthorsSrcUrl, *berthaRolesSrcUrl)
+		mh := newMembershipHandler(bs)
 
-		h := setupServiceHandlers(ah)
+		h := setupServiceHandlers(mh)
 
 		http.Handle("/", httphandlers.HTTPMetricsHandler(metrics.DefaultRegistry,
 			httphandlers.TransactionAwareRequestLoggingHandler(log.StandardLogger(), h)))
@@ -50,19 +56,19 @@ func main() {
 	app.Run(os.Args)
 }
 
-func setupServiceHandlers(ah authorHandler) http.Handler {
+func setupServiceHandlers(mh membershipHandler) http.Handler {
 	r := mux.NewRouter()
 
 	r.HandleFunc(status.PingPath, status.PingHandler)
 	r.HandleFunc(status.PingPathDW, status.PingHandler)
 	r.HandleFunc(status.BuildInfoPath, status.BuildInfoHandler)
 	r.HandleFunc(status.BuildInfoPathDW, status.BuildInfoHandler)
-	r.HandleFunc("/__health", v1a.Handler("Curated Authors Transformer", "Checks for accessing Bertha", ah.HealthCheck()))
-	r.HandleFunc(status.GTGPath, ah.GoodToGo)
+	r.HandleFunc("/__health", v1a.Handler("Curated Authors Membership Transformer", "Checks for accessing Bertha", mh.AuthorsHealthCheck(), mh.RolesHealthCheck()))
+	r.HandleFunc(status.GTGPath, mh.GoodToGo)
 
-	r.HandleFunc("/transformers/authors/__count", ah.getAuthorsCount).Methods("GET")
-	r.HandleFunc("/transformers/authors/__ids", ah.getAuthorsUuids).Methods("GET")
-	r.HandleFunc("/transformers/authors/{uuid}", ah.getAuthorByUuid).Methods("GET")
+	r.HandleFunc("/transformers/author-memberships/__count", mh.getMembershipsCount).Methods("GET")
+	r.HandleFunc("/transformers/author-memberships/__ids", mh.getMembershipUuids).Methods("GET")
+	r.HandleFunc("/transformers/author-memberships/{uuid}", mh.getMembershipByUuid).Methods("GET")
 
 	return r
 }

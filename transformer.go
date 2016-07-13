@@ -1,5 +1,5 @@
 package main
 
 type transformer interface {
-	authorToPerson(author) (person, error)
+	toMembership(author, map[string]berthaRole) (membership, error)
 }

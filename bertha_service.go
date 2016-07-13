@@ -12,51 +12,102 @@ import (
 var client = httpcache.NewMemoryCacheTransport().Client()
 
 type berthaService struct {
-	berthaUrl  string
-	authorsMap map[string]author
+	authorsUrl     string
+	rolesUrl       string
+	membershipsMap map[string]membership
+	transformer    transformer
 }
 
-func (bs *berthaService) getAuthorsCount() (int, error) {
-	bs.authorsMap = make(map[string]author)
+func newBerthaService(authorsUrl string, rolesUrl string) *berthaService {
+	return &berthaService{
+		authorsUrl:  authorsUrl,
+		rolesUrl:    rolesUrl,
+		transformer: &berthaTransformer{},
+	}
+}
 
-	resp, err := bs.callBerthaService()
-	if err != nil {
-		log.Error(err)
-		return -1, err
+func (bs *berthaService) getMembershipCount() (int, error) {
+	bs.membershipsMap = make(map[string]membership)
+	authResp, authErr := bs.callBerthaService(bs.authorsUrl)
+	if authErr != nil {
+		log.Error(authErr)
+		return -1, authErr
 	}
 
 	var authors []author
-	if err = json.NewDecoder(resp.Body).Decode(&authors); err != nil {
+	if err := json.NewDecoder(authResp.Body).Decode(&authors); err != nil {
 		log.Error(err)
 		return -1, err
 	}
 
-	for _, a := range authors {
-		bs.authorsMap[a.Uuid] = a
+	rolesResp, rolesErr := bs.callBerthaService(bs.rolesUrl)
+	if rolesErr != nil {
+		log.Error(rolesErr)
+		return -1, rolesErr
 	}
-	return len(bs.authorsMap), nil
+
+	var roles []berthaRole
+	if err := json.NewDecoder(rolesResp.Body).Decode(&roles); err != nil {
+		log.Error(err)
+		return -1, err
+	}
+
+	if err := bs.populateMembershipMap(authors, roles); err != nil {
+		log.Error(err)
+		return -1, err
+	}
+
+	return len(bs.membershipsMap), nil
 }
 
-func (bs *berthaService) getAuthorsUuids() []string {
+func (bs *berthaService) populateMembershipMap(authors []author, roles []berthaRole) error {
+	rolesMap := make(map[string]berthaRole)
+
+	for _, r := range roles {
+		rolesMap[r.Preflabel] = r
+	}
+
+	for _, a := range authors {
+		m, err := bs.transformer.toMembership(a, rolesMap)
+		if err != nil {
+			bs.membershipsMap = make(map[string]membership)
+			return err
+		}
+		fmt.Println(m.UUID)
+		bs.membershipsMap[m.UUID] = m
+	}
+	return nil
+}
+
+func (bs *berthaService) getMembershipUuids() []string {
 	uuids := make([]string, 0)
-	for uuid, _ := range bs.authorsMap {
+	for uuid, _ := range bs.membershipsMap {
 		uuids = append(uuids, uuid)
 	}
 	return uuids
 }
 
-func (bs *berthaService) getAuthorByUuid(uuid string) author {
-	return bs.authorsMap[uuid]
+func (bs *berthaService) getMembershipByUuid(uuid string) membership {
+	fmt.Println(bs.membershipsMap[uuid])
+	return bs.membershipsMap[uuid]
 }
 
-func (bs *berthaService) callBerthaService() (res *http.Response, err error) {
-	log.WithFields(log.Fields{"bertha_url": bs.berthaUrl}).Info("Calling Bertha...")
-	res, err = client.Get(bs.berthaUrl)
+func (bs *berthaService) callBerthaService(url string) (res *http.Response, err error) {
+	log.WithFields(log.Fields{"bertha_url": url}).Info("Calling Bertha...")
+	res, err = client.Get(url)
 	return
 }
 
-func (bs *berthaService) checkConnectivity() error {
-	resp, err := bs.callBerthaService()
+func (bs *berthaService) checkAuthorsConnectivity() error {
+	return bs.checkConnectivity(bs.authorsUrl)
+}
+
+func (bs *berthaService) checkRolesConnectivity() error {
+	return bs.checkConnectivity(bs.rolesUrl)
+}
+
+func (bs *berthaService) checkConnectivity(url string) error {
+	resp, err := bs.callBerthaService(url)
 	if err != nil {
 		return err
 	}

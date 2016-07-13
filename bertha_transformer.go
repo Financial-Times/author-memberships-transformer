@@ -1,38 +1,38 @@
 package main
 
 import (
-	"github.com/jaytaylor/html2text"
+	"errors"
+	"fmt"
 )
 
-const tmeAuthority = "http://api.ft.com/system/FT-TME"
+const ftUuid = "dac01f07-4b6d-3615-8532-a56752cc7e5f"
 
 type berthaTransformer struct {
 }
 
-func (bt *berthaTransformer) authorToPerson(a author) (person, error) {
-	plainDescription, err := html2text.FromString(a.Biography)
+func (bt *berthaTransformer) toMembership(a author, rolesMap map[string]berthaRole) (membership, error) {
+	fmt.Println(a.Membershipuuid)
 
-	if err != nil {
-		return person{}, err
+	roleUuid := rolesMap[a.Role].UUID
+
+	if roleUuid == "" {
+		return membership{}, errors.New(fmt.Sprintf(`Role UUID is not found for "%s"`, a.Role))
 	}
 
-	id := identifier{
-		Authority:       tmeAuthority,
-		IdentifierValue: a.TmeIdentifier,
+	memRole := membershipRole{RoleUUID: roleUuid}
+	memRoles := []membershipRole{memRole}
+
+	altIds := alternativeIdentifiers{
+		UUIDS: []string{a.Membershipuuid},
 	}
 
-	identifiers := []identifier{id}
-
-	p := person{
-		Uuid:           a.Uuid,
-		Name:           a.Name,
-		EmailAddress:   a.Email,
-		TwitterHandle:  a.TwitterHandle,
-		Description:    plainDescription,
-		DescriptionXML: a.Biography,
-		ImageUrl:       a.ImageUrl,
-		Identifiers:    identifiers,
+	m := membership{
+		UUID:                   a.Membershipuuid,
+		PrefLabel:              a.Jobtitle,
+		PersonUUID:             a.UUID,
+		OrganisationUUID:       ftUuid,
+		AlternativeIdentifiers: altIds,
+		MembershipRoles:        memRoles,
 	}
-
-	return p, err
+	return m, nil
 }
