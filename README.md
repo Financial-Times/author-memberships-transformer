@@ -1,4 +1,4 @@
-# curated-authors--transformer
+# curated-authors-membership-transformer
 
 [![CircleCI](https://circleci.com/gh/Financial-Times/curated-authors-membership-transformer.svg?style=svg)](https://circleci.com/gh/Financial-Times/curated-authors-membership-transformer)
 
