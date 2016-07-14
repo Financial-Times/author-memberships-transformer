@@ -11,8 +11,6 @@ type berthaTransformer struct {
 }
 
 func (bt *berthaTransformer) toMembership(a author, rolesMap map[string]berthaRole) (membership, error) {
-	fmt.Println(a.Membershipuuid)
-
 	roleUuid := rolesMap[a.Role].UUID
 
 	if roleUuid == "" {

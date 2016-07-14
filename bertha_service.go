@@ -73,7 +73,6 @@ func (bs *berthaService) populateMembershipMap(authors []author, roles []berthaR
 			bs.membershipsMap = make(map[string]membership)
 			return err
 		}
-		fmt.Println(m.UUID)
 		bs.membershipsMap[m.UUID] = m
 	}
 	return nil
@@ -88,7 +87,6 @@ func (bs *berthaService) getMembershipUuids() []string {
 }
 
 func (bs *berthaService) getMembershipByUuid(uuid string) membership {
-	fmt.Println(bs.membershipsMap[uuid])
 	return bs.membershipsMap[uuid]
 }
 
