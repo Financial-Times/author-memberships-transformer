@@ -1,11 +1,11 @@
 FROM alpine:3.3
 
-ADD *.go .git /curated-authors-membership-transformer/
+ADD *.go .git /author-memberships-transformer/
 
 RUN apk --update add git go \
   && export GOPATH=/gopath \
-  && REPO_PATH="github.com/Financial-Times/curated-authors-membership-transformer" \
-  && cd curated-authors-membership-transformer \
+  && REPO_PATH="github.com/Financial-Times/author-memberships-transformer" \
+  && cd author-memberships-transformer \
   && BUILDINFO_PACKAGE="github.com/Financial-Times/service-status-go/buildinfo." \
   && VERSION="version=$(git describe --tag --always 2> /dev/null)" \
   && DATETIME="dateTime=$(date -u +%Y%m%d%H%M%S)" \
@@ -19,8 +19,8 @@ RUN apk --update add git go \
   && cd $GOPATH/src/${REPO_PATH} \
   && go get -t ./... \
   && go build -ldflags="${LDFLAGS}" \
-  && mv curated-authors-membership-transformer /curated-authors-membership-transformer-app \
+  && mv author-memberships-transformer /author-memberships-transformer-app \
   && apk del go git \
   && rm -rf $GOPATH /var/cache/apk/*
 
-CMD exec /curated-authors-membership-transformer-app 
+CMD exec /author-memberships-transformer-app 

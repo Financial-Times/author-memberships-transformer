@@ -1,8 +1,8 @@
-# curated-authors-membership-transformer
+# author-memberships-transformer
 
-[![CircleCI](https://circleci.com/gh/Financial-Times/curated-authors-membership-transformer.svg?style=svg)](https://circleci.com/gh/Financial-Times/curated-authors-membership-transformer)
+[![CircleCI](https://circleci.com/gh/Financial-Times/author-memberships-transformer.svg?style=svg)](https://circleci.com/gh/Financial-Times/author-memberships-transformer)
 
-Retrieves author data curated by editorial people and transforms it to People Membership according to UP JSON model.
+Retrieves author data curated by editorial people and transforms it to People Memberships according to UP JSON model.
 Authors data is specified by a Google spreadsheet which is accessible through [Bertha API](https://github.com/ft-interactive/bertha/wiki/Tutorial).
 The service exposes endpoints for getting all the curated authors' UUIDs and for getting authors by uuid.
 
@@ -10,22 +10,22 @@ The service exposes endpoints for getting all the curated authors' UUIDs and for
 
 ## Locally: 
 
-`go get github.com/Financial-Times/curated-authors-membership-transformer`
+`go get github.com/Financial-Times/author-memberships-transformer`
 
-`$GOPATH/bin/ ./curated-authors-membership-transformer --bertha-authors-source-url=<BERTHA_AUTHORS_SOURCE_URL> --bertha-roles-source-url=<BERTHA_ROLES_SOURCE_URL> --port=8080`                
+`$GOPATH/bin/ ./author-memberships-transformer --bertha-authors-source-url=<BERTHA_AUTHORS_SOURCE_URL> --bertha-roles-source-url=<BERTHA_ROLES_SOURCE_URL> --port=8080`                
 
 ```
 export|set PORT=8080
 export|set BERTHA_AUTHORS_SOURCE_URL="http://.../Authors"
 export|set BERTHA_ROLES_SOURCE_URL="http://.../Roles"
-$GOPATH/bin/curated-authors-membership-transformer
+$GOPATH/bin/author-memberships-transformer
 ```
 
 ## With Docker:
 
-`docker build -t coco/curated-authors-membership-transformer .`
+`docker build -t coco/author-memberships-transformer .`
 
-`docker run -ti --env BERTHA_AUTHORS_SOURCE_URL=<bertha_authors_url> --env BERTHA_ROLES_SOURCE_URL=<bertha_roles_url> coco/curated-authors-membership-transformer`
+`docker run -ti --env BERTHA_AUTHORS_SOURCE_URL=<bertha_authors_url> --env BERTHA_ROLES_SOURCE_URL=<bertha_roles_url> coco/author-memberships-transformer`
 
 #Endpoints
 

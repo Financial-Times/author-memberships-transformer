@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-	app := cli.App("curated-authors-transformer", "A RESTful API for transforming Bertha Curated Authors to UP People JSON")
+	app := cli.App("author-memberhips-transformer", "A RESTful API for transforming Bertha Curated Authors to UP People Memberships JSON")
 
 	port := app.Int(cli.IntOpt{
 		Name:   "port",
@@ -46,10 +46,10 @@ func main() {
 		http.Handle("/", httphandlers.HTTPMetricsHandler(metrics.DefaultRegistry,
 			httphandlers.TransactionAwareRequestLoggingHandler(log.StandardLogger(), h)))
 
-		log.Infof("Listening on [%d].\n", *port)
+		log.Infof("Listening on [%d].", *port)
 		err := http.ListenAndServe(fmt.Sprintf(":%d", *port), nil)
 		if err != nil {
-			log.Printf("Web server failed: [%v].\n", err)
+			log.Printf("Web server failed: [%v].", err)
 		}
 	}
 
