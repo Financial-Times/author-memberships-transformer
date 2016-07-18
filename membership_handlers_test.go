@@ -58,7 +58,7 @@ func TestShouldReturn200AndMembershipCount(t *testing.T) {
 	startCuratedAuthorsMembershipTransformer(mbs)
 	defer curatedAuthorsMembershipTransformer.Close()
 
-	resp, err := http.Get(curatedAuthorsMembershipTransformer.URL + "/transformers/author-memberships/__count")
+	resp, err := http.Get(curatedAuthorsMembershipTransformer.URL + "/transformers/memberships/__count")
 	if err != nil {
 		panic(err)
 	}
@@ -77,7 +77,7 @@ func TestShouldReturn200AndMembershipUuids(t *testing.T) {
 	startCuratedAuthorsMembershipTransformer(mbs)
 	defer curatedAuthorsMembershipTransformer.Close()
 
-	resp, err := http.Get(curatedAuthorsMembershipTransformer.URL + "/transformers/author-memberships/__ids")
+	resp, err := http.Get(curatedAuthorsMembershipTransformer.URL + "/transformers/memberships/__ids")
 	if err != nil {
 		panic(err)
 	}
@@ -101,7 +101,7 @@ func TestShouldReturn200AndTrasformedMembership(t *testing.T) {
 	startCuratedAuthorsMembershipTransformer(mbs)
 	defer curatedAuthorsMembershipTransformer.Close()
 
-	resp, err := http.Get(curatedAuthorsMembershipTransformer.URL + "/transformers/author-memberships/" + aMembership.UUID)
+	resp, err := http.Get(curatedAuthorsMembershipTransformer.URL + "/transformers/memberships/" + aMembership.UUID)
 	if err != nil {
 		panic(err)
 	}
@@ -125,7 +125,7 @@ func TestShouldReturn404WhenMembershipIsNotFound(t *testing.T) {
 	startCuratedAuthorsMembershipTransformer(mbs)
 	defer curatedAuthorsMembershipTransformer.Close()
 
-	resp, err := http.Get(curatedAuthorsMembershipTransformer.URL + "/transformers/author-memberships/" + aMembership.UUID)
+	resp, err := http.Get(curatedAuthorsMembershipTransformer.URL + "/transformers/memberships/" + aMembership.UUID)
 	if err != nil {
 		panic(err)
 	}
@@ -140,7 +140,7 @@ func TestShouldReturn500WhenBerthaReturnsError(t *testing.T) {
 	startCuratedAuthorsMembershipTransformer(mbs)
 	defer curatedAuthorsMembershipTransformer.Close()
 
-	resp, err := http.Get(curatedAuthorsMembershipTransformer.URL + "/transformers/author-memberships/__count")
+	resp, err := http.Get(curatedAuthorsMembershipTransformer.URL + "/transformers/memberships/__count")
 	if err != nil {
 		panic(err)
 	}
