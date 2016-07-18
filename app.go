@@ -66,6 +66,7 @@ func setupServiceHandlers(mh membershipHandler) http.Handler {
 	r.HandleFunc("/__health", v1a.Handler("Curated Authors Membership Transformer", "Checks for accessing Bertha", mh.AuthorsHealthCheck(), mh.RolesHealthCheck()))
 	r.HandleFunc(status.GTGPath, mh.GoodToGo)
 
+	r.HandleFunc("/transformers/memberships", mh.refreshMembershipCache).Methods("POST")
 	r.HandleFunc("/transformers/memberships/__count", mh.getMembershipsCount).Methods("GET")
 	r.HandleFunc("/transformers/memberships/__ids", mh.getMembershipUuids).Methods("GET")
 	r.HandleFunc("/transformers/memberships/{uuid}", mh.getMembershipByUuid).Methods("GET")

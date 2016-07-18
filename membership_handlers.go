@@ -21,10 +21,19 @@ func newMembershipHandler(ms membershipService) membershipHandler {
 	}
 }
 
+func (mh *membershipHandler) refreshMembershipCache(writer http.ResponseWriter, req *http.Request) {
+	err := mh.membershipService.refreshMembershipCache()
+	if err != nil {
+		writeJSONMessage(writer, err.Error(), http.StatusInternalServerError)
+	} else {
+		writeJSONMessage(writer, "Memberships fetched", http.StatusOK)
+	}
+}
+
 func (mh *membershipHandler) getMembershipsCount(writer http.ResponseWriter, req *http.Request) {
 	c, err := mh.membershipService.getMembershipCount()
 	if err != nil {
-		writeJSONError(writer, err.Error(), http.StatusInternalServerError)
+		writeJSONMessage(writer, err.Error(), http.StatusInternalServerError)
 	} else {
 		var buffer bytes.Buffer
 		buffer.WriteString(fmt.Sprintf(`%v`, c))
@@ -33,25 +42,33 @@ func (mh *membershipHandler) getMembershipsCount(writer http.ResponseWriter, req
 }
 
 func (mh *membershipHandler) getMembershipUuids(writer http.ResponseWriter, req *http.Request) {
-	uuids := mh.membershipService.getMembershipUuids()
-	writeStreamResponse(uuids, writer)
+	uuids, err := mh.membershipService.getMembershipUuids()
+	if err != nil {
+		writeJSONMessage(writer, err.Error(), http.StatusInternalServerError)
+	} else {
+		writeStreamResponse(uuids, writer)
+	}
 }
 
 func (mh *membershipHandler) getMembershipByUuid(writer http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	uuid := vars["uuid"]
 
-	m := mh.membershipService.getMembershipByUuid(uuid)
-	writeJSONResponse(m, !reflect.DeepEqual(m, membership{}), writer)
+	m, err := mh.membershipService.getMembershipByUuid(uuid)
+	if err != nil {
+		writeJSONMessage(writer, err.Error(), http.StatusInternalServerError)
+	} else {
+		writeJSONResponse(m, !reflect.DeepEqual(m, membership{}), writer)
+	}
 }
 
 func (mh *membershipHandler) AuthorsHealthCheck() v1a.Check {
 	return v1a.Check{
 		BusinessImpact:   "Unable to respond to request for curated author data from Bertha",
-		Name:             "Check connectivity to Bertha",
-		PanicGuide:       "https://sites.google.com/a/ft.com/ft-technology-service-transition/home/run-book-library/curated-authors-transfomer",
+		Name:             "Check connectivity to Bertha Authors Spreadsheet",
+		PanicGuide:       "https://sites.google.com/a/ft.com/ft-technology-service-transition/home/run-book-library/curated-authors-membership-transfomer",
 		Severity:         1,
-		TechnicalSummary: "Cannot connect to Bertha to be able to supply curated authors",
+		TechnicalSummary: "Cannot connect to Bertha to be able to supply curated authors information",
 		Checker:          mh.authorsChecker,
 	}
 }
@@ -67,10 +84,10 @@ func (mh *membershipHandler) authorsChecker() (string, error) {
 func (mh *membershipHandler) RolesHealthCheck() v1a.Check {
 	return v1a.Check{
 		BusinessImpact:   "Unable to respond to request for curated author roles data from Bertha",
-		Name:             "Check connectivity to Bertha",
-		PanicGuide:       "https://sites.google.com/a/ft.com/ft-technology-service-transition/home/run-book-library/curated-authors-transfomer",
+		Name:             "Check connectivity to Bertha Roles Spreadsheet",
+		PanicGuide:       "https://sites.google.com/a/ft.com/ft-technology-service-transition/home/run-book-library/curated-authors-memberships-transfomer",
 		Severity:         1,
-		TechnicalSummary: "Cannot connect to Bertha to be able to supply curated authors",
+		TechnicalSummary: "Cannot connect to Bertha to be able to supply author roles",
 		Checker:          mh.rolesChecker,
 	}
 }
@@ -93,19 +110,19 @@ func writeJSONResponse(obj interface{}, found bool, writer http.ResponseWriter) 
 	writer.Header().Add("Content-Type", "application/json")
 
 	if !found {
-		writer.WriteHeader(http.StatusNotFound)
+		writeJSONMessage(writer, "Membership not found", http.StatusNotFound)
 		return
 	}
 
 	enc := json.NewEncoder(writer)
 	if err := enc.Encode(obj); err != nil {
 		log.Errorf("Error on json encoding=%v\n", err)
-		writeJSONError(writer, err.Error(), http.StatusInternalServerError)
+		writeJSONMessage(writer, err.Error(), http.StatusInternalServerError)
 		return
 	}
 }
 
-func writeJSONError(w http.ResponseWriter, errorMsg string, statusCode int) {
+func writeJSONMessage(w http.ResponseWriter, errorMsg string, statusCode int) {
 	w.WriteHeader(statusCode)
 	fmt.Fprintln(w, fmt.Sprintf("{\"message\": \"%s\"}", errorMsg))
 }

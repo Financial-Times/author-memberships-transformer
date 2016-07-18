@@ -1,9 +1,10 @@
 package main
 
 type membershipService interface {
+	refreshMembershipCache() error
 	getMembershipCount() (int, error)
-	getMembershipUuids() []string
-	getMembershipByUuid(uuid string) membership
+	getMembershipUuids() ([]string, error)
+	getMembershipByUuid(uuid string) (membership, error)
 	checkAuthorsConnectivity() error
 	checkRolesConnectivity() error
 }

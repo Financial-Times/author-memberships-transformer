@@ -76,6 +76,10 @@ $GOPATH/bin/curated-authors-memberships-transformer
 
 #Endpoints
 
+##Refresh Cache
+`POST /transformers/memberships` with empty request message refreshes the transformer cache.
+The transformer loads Bertha data in memory at startup time by default. Every time a POST triggers this endpoint, the transformer refetches Bertha data. 
+
 ##Count
 `GET /transformers/memberships/__count` returns the number of available memberships to be transformed as plain text.
 A response example is provided below.
@@ -116,3 +120,4 @@ A response example is provided below.
   ]
 }
 ```
+

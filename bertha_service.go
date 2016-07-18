@@ -26,38 +26,37 @@ func newBerthaService(authorsUrl string, rolesUrl string) *berthaService {
 	}
 }
 
-func (bs *berthaService) getMembershipCount() (int, error) {
+func (bs *berthaService) refreshMembershipCache() error {
 	bs.membershipsMap = make(map[string]membership)
 	authResp, authErr := bs.callBerthaService(bs.authorsUrl)
 	if authErr != nil {
 		log.Error(authErr)
-		return -1, authErr
+		return authErr
 	}
 
 	var authors []author
 	if err := json.NewDecoder(authResp.Body).Decode(&authors); err != nil {
 		log.Error(err)
-		return -1, err
+		return err
 	}
 
 	rolesResp, rolesErr := bs.callBerthaService(bs.rolesUrl)
 	if rolesErr != nil {
 		log.Error(rolesErr)
-		return -1, rolesErr
+		return rolesErr
 	}
 
 	var roles []berthaRole
 	if err := json.NewDecoder(rolesResp.Body).Decode(&roles); err != nil {
 		log.Error(err)
-		return -1, err
+		return err
 	}
 
 	if err := bs.populateMembershipMap(authors, roles); err != nil {
 		log.Error(err)
-		return -1, err
+		return err
 	}
-
-	return len(bs.membershipsMap), nil
+	return nil
 }
 
 func (bs *berthaService) populateMembershipMap(authors []author, roles []berthaRole) error {
@@ -78,16 +77,35 @@ func (bs *berthaService) populateMembershipMap(authors []author, roles []berthaR
 	return nil
 }
 
-func (bs *berthaService) getMembershipUuids() []string {
+func (bs *berthaService) getMembershipCount() (int, error) {
+	if len(bs.membershipsMap) == 0 {
+		if err := bs.refreshMembershipCache(); err != nil {
+			return -1, err
+		}
+	}
+	return len(bs.membershipsMap), nil
+}
+
+func (bs *berthaService) getMembershipUuids() ([]string, error) {
+	if len(bs.membershipsMap) == 0 {
+		if err := bs.refreshMembershipCache(); err != nil {
+			return []string{}, err
+		}
+	}
 	uuids := make([]string, 0)
 	for uuid, _ := range bs.membershipsMap {
 		uuids = append(uuids, uuid)
 	}
-	return uuids
+	return uuids, nil
 }
 
-func (bs *berthaService) getMembershipByUuid(uuid string) membership {
-	return bs.membershipsMap[uuid]
+func (bs *berthaService) getMembershipByUuid(uuid string) (membership, error) {
+	if len(bs.membershipsMap) == 0 {
+		if err := bs.refreshMembershipCache(); err != nil {
+			return membership{}, err
+		}
+	}
+	return bs.membershipsMap[uuid], nil
 }
 
 func (bs *berthaService) callBerthaService(url string) (res *http.Response, err error) {

@@ -21,14 +21,19 @@ type MockedBerthaService struct {
 	mock.Mock
 }
 
-func (m *MockedBerthaService) getMembershipUuids() []string {
+func (m *MockedBerthaService) refreshMembershipCache() error {
 	args := m.Called()
-	return args.Get(0).([]string)
+	return args.Error(0)
 }
 
-func (m *MockedBerthaService) getMembershipByUuid(uuid string) membership {
+func (m *MockedBerthaService) getMembershipUuids() ([]string, error) {
+	args := m.Called()
+	return args.Get(0).([]string), args.Error(1)
+}
+
+func (m *MockedBerthaService) getMembershipByUuid(uuid string) (membership, error) {
 	args := m.Called(uuid)
-	return args.Get(0).(membership)
+	return args.Get(0).(membership), args.Error(1)
 }
 
 func (m *MockedBerthaService) getMembershipCount() (int, error) {
@@ -70,10 +75,25 @@ func TestShouldReturn200AndMembershipCount(t *testing.T) {
 	assert.Equal(t, "2", actualOutput, "Response body should contain the count of available authors")
 }
 
-func TestShouldReturn200AndMembershipUuids(t *testing.T) {
+func TestShouldReturn200WhenMembershipChacheIsRefreshed(t *testing.T) {
 
 	mbs := new(MockedBerthaService)
-	mbs.On("getMembershipUuids").Return(uuids)
+	mbs.On("refreshMembershipCache").Return(nil)
+	startCuratedAuthorsMembershipTransformer(mbs)
+	defer curatedAuthorsMembershipTransformer.Close()
+
+	resp, err := http.Post(curatedAuthorsMembershipTransformer.URL+"/transformers/memberships", "", nil)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	assert.Equal(t, http.StatusOK, resp.StatusCode, "Response status should be 200")
+}
+
+func TestShouldReturn200AndMembershipUuids(t *testing.T) {
+	mbs := new(MockedBerthaService)
+	mbs.On("getMembershipUuids").Return(uuids, nil)
 	startCuratedAuthorsMembershipTransformer(mbs)
 	defer curatedAuthorsMembershipTransformer.Close()
 
@@ -95,9 +115,9 @@ func getStringFromReader(r io.Reader) string {
 	return buf.String()
 }
 
-func TestShouldReturn200AndTrasformedMembership(t *testing.T) {
+func TestShouldReturn200AndTransformedMembership(t *testing.T) {
 	mbs := new(MockedBerthaService)
-	mbs.On("getMembershipByUuid", aMembership.UUID).Return(aMembership)
+	mbs.On("getMembershipByUuid", aMembership.UUID).Return(aMembership, nil)
 	startCuratedAuthorsMembershipTransformer(mbs)
 	defer curatedAuthorsMembershipTransformer.Close()
 
@@ -121,7 +141,7 @@ func TestShouldReturn200AndTrasformedMembership(t *testing.T) {
 
 func TestShouldReturn404WhenMembershipIsNotFound(t *testing.T) {
 	mbs := new(MockedBerthaService)
-	mbs.On("getMembershipByUuid", aMembership.UUID).Return(membership{})
+	mbs.On("getMembershipByUuid", aMembership.UUID).Return(membership{}, nil)
 	startCuratedAuthorsMembershipTransformer(mbs)
 	defer curatedAuthorsMembershipTransformer.Close()
 
@@ -134,13 +154,58 @@ func TestShouldReturn404WhenMembershipIsNotFound(t *testing.T) {
 	assert.Equal(t, http.StatusNotFound, resp.StatusCode, "Response status should be 404")
 }
 
-func TestShouldReturn500WhenBerthaReturnsError(t *testing.T) {
+func TestShouldReturn500WhenCountReturnsError(t *testing.T) {
 	mbs := new(MockedBerthaService)
-	mbs.On("getMembershipCount").Return(-1, errors.New("I am a zobie"))
+	mbs.On("getMembershipCount").Return(-1, errors.New("I am a zombie"))
 	startCuratedAuthorsMembershipTransformer(mbs)
 	defer curatedAuthorsMembershipTransformer.Close()
 
 	resp, err := http.Get(curatedAuthorsMembershipTransformer.URL + "/transformers/memberships/__count")
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	assert.Equal(t, http.StatusInternalServerError, resp.StatusCode, "Response status should be 500")
+}
+
+func TestShouldReturn500WhenMembershipUuidsReturnError(t *testing.T) {
+	mbs := new(MockedBerthaService)
+	mbs.On("getMembershipUuids").Return([]string{}, errors.New("I am a zombie"))
+	startCuratedAuthorsMembershipTransformer(mbs)
+	defer curatedAuthorsMembershipTransformer.Close()
+
+	resp, err := http.Get(curatedAuthorsMembershipTransformer.URL + "/transformers/memberships/__ids")
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	assert.Equal(t, http.StatusInternalServerError, resp.StatusCode, "Response status should be 500")
+}
+
+func TestShouldReturn500WhenMembershipReturnsError(t *testing.T) {
+	mbs := new(MockedBerthaService)
+	mbs.On("getMembershipByUuid", aMembership.UUID).Return(membership{}, errors.New("I am a zombie"))
+	startCuratedAuthorsMembershipTransformer(mbs)
+	defer curatedAuthorsMembershipTransformer.Close()
+
+	resp, err := http.Get(curatedAuthorsMembershipTransformer.URL + "/transformers/memberships/" + aMembership.UUID)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	assert.Equal(t, http.StatusInternalServerError, resp.StatusCode, "Response status should be 500")
+}
+
+func TestShouldReturn500WhenCacheRefreshReturnsError(t *testing.T) {
+	mbs := new(MockedBerthaService)
+	mbs.On("refreshMembershipCache").Return(errors.New("I am a zombie"))
+	startCuratedAuthorsMembershipTransformer(mbs)
+	defer curatedAuthorsMembershipTransformer.Close()
+
+	resp, err := http.Post(curatedAuthorsMembershipTransformer.URL+"/transformers/memberships", "", nil)
 	if err != nil {
 		panic(err)
 	}

@@ -12,7 +12,7 @@ import (
 )
 
 const etag = "W/\"75e-78600296\""
-const aurhorsBerthaPath = "/view/publish/gss/123456XYZ/Authors"
+const authorsBerthaPath = "/view/publish/gss/123456XYZ/Authors"
 const rolesBerthaPath = "/view/publish/gss/123456XYZ/Roles"
 const authorsBerthaOutput = "test-resources/bertha-authors-output.json"
 const rolesBerthaOutput = "test-resources/bertha-roles-output.json"
@@ -35,7 +35,7 @@ type berthaMock struct {
 	path       string
 }
 
-var berthaAuthorsMock = berthaMock{outputFile: authorsBerthaOutput, path: aurhorsBerthaPath}
+var berthaAuthorsMock = berthaMock{outputFile: authorsBerthaOutput, path: authorsBerthaPath}
 var berthaRolesMock = berthaMock{outputFile: rolesBerthaOutput, path: rolesBerthaPath}
 
 func (mock *berthaMock) getUrl() string {
@@ -101,7 +101,9 @@ func TestShouldReturnMembershipsUuids(t *testing.T) {
 	bs := newBerthaService(berthaAuthorsMock.getUrl(), berthaRolesMock.getUrl())
 
 	bs.getMembershipCount()
-	uuids := bs.getMembershipUuids()
+	uuids, err := bs.getMembershipUuids()
+
+	assert.Nil(t, err)
 	assert.Equal(t, 2, len(uuids), "Bertha should return 2 authors")
 	assert.Equal(t, true, contains(uuids, membership1.UUID), "It should contain membership1 UUID")
 	assert.Equal(t, true, contains(uuids, membership2.UUID), "It should contain membership2 UUID")
@@ -116,32 +118,10 @@ func TestShouldReturnSingleMembership(t *testing.T) {
 	bs := newBerthaService(berthaAuthorsMock.getUrl(), berthaRolesMock.getUrl())
 
 	bs.getMembershipCount()
-	m := bs.getMembershipByUuid(membership1.UUID)
+	m, err := bs.getMembershipByUuid(membership1.UUID)
+
+	assert.Nil(t, err)
 	assert.Equal(t, membership1, m, "The membership should be membership1")
-}
-
-func TestShouldReturnEmptyMembershipUuidsWhenMembershipCountIsNotCalled(t *testing.T) {
-	berthaAuthorsMock.start("happy")
-	defer berthaAuthorsMock.stop()
-	berthaRolesMock.start("happy")
-	defer berthaRolesMock.stop()
-
-	bs := newBerthaService(berthaAuthorsMock.getUrl(), berthaRolesMock.getUrl())
-
-	uuids := bs.getMembershipUuids()
-	assert.Equal(t, 0, len(uuids), "Bertha should return 0 memberships")
-}
-
-func TestShouldReturnEmptyMembershiprWhenMembershipCountIsNotCalled(t *testing.T) {
-	berthaAuthorsMock.start("happy")
-	defer berthaAuthorsMock.stop()
-	berthaRolesMock.start("happy")
-	defer berthaRolesMock.stop()
-
-	bs := newBerthaService(berthaAuthorsMock.getUrl(), berthaRolesMock.getUrl())
-
-	m := bs.getMembershipByUuid(membership1.UUID)
-	assert.Equal(t, membership{}, m, "The membership should be empty")
 }
 
 func TestShouldReturnEmptyMembershipWhenMembershipIsNotAvailable(t *testing.T) {
@@ -151,8 +131,9 @@ func TestShouldReturnEmptyMembershipWhenMembershipIsNotAvailable(t *testing.T) {
 	defer berthaRolesMock.stop()
 
 	bs := newBerthaService(berthaAuthorsMock.getUrl(), berthaRolesMock.getUrl())
+	m, err := bs.getMembershipByUuid("7f8bd61a-3575-4d32-a758-0fa41cbcc826")
 
-	m := bs.getMembershipByUuid("7f8bd61a-3575-4d32-a758-0fa41cbcc826")
+	assert.Nil(t, err)
 	assert.Equal(t, membership{}, m, "The membership should be empty")
 }
 
@@ -164,15 +145,20 @@ func TestShouldReturnErrorWhenBerthaAuthorsIsUnhappy(t *testing.T) {
 
 	bs := newBerthaService(berthaAuthorsMock.getUrl(), berthaRolesMock.getUrl())
 
+	err := bs.refreshMembershipCache()
+	assert.NotNil(t, err)
+
 	c, err := bs.getMembershipCount()
 	assert.NotNil(t, err)
 	assert.Equal(t, -1, c, "It should return -1")
 
-	uuids := bs.getMembershipUuids()
+	uuids, err := bs.getMembershipUuids()
+	assert.NotNil(t, err)
 	assert.Equal(t, 0, len(uuids), "It should return 0 UUIDs")
 
-	m := bs.getMembershipByUuid(membership1.UUID)
-	assert.Equal(t, membership{}, m, "The author should be empty")
+	m, err := bs.getMembershipByUuid(membership1.UUID)
+	assert.NotNil(t, err)
+	assert.Equal(t, membership{}, m, "The membership should be empty")
 }
 
 func TestShouldReturnErrorWhenBerthaRolesIsUnhappy(t *testing.T) {
@@ -183,15 +169,20 @@ func TestShouldReturnErrorWhenBerthaRolesIsUnhappy(t *testing.T) {
 
 	bs := newBerthaService(berthaAuthorsMock.getUrl(), berthaRolesMock.getUrl())
 
+	err := bs.refreshMembershipCache()
+	assert.NotNil(t, err)
+
 	c, err := bs.getMembershipCount()
 	assert.NotNil(t, err)
 	assert.Equal(t, -1, c, "It should return -1")
 
-	uuids := bs.getMembershipUuids()
+	uuids, err := bs.getMembershipUuids()
+	assert.NotNil(t, err)
 	assert.Equal(t, 0, len(uuids), "It should return 0 UUIDs")
 
-	m := bs.getMembershipByUuid(membership1.UUID)
-	assert.Equal(t, membership{}, m, "The author should be empty")
+	m, err := bs.getMembershipByUuid(membership1.UUID)
+	assert.NotNil(t, err)
+	assert.Equal(t, membership{}, m, "The membership should be empty")
 }
 
 func TestCheckConnectivityOfHappyBertaAuthors(t *testing.T) {
