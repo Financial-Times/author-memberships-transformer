@@ -3,8 +3,55 @@
 [![CircleCI](https://circleci.com/gh/Financial-Times/author-memberships-transformer.svg?style=svg)](https://circleci.com/gh/Financial-Times/author-memberships-transformer)
 
 Retrieves author data curated by editorial people and transforms it to People Memberships according to UP JSON model.
-Authors data is specified by a Google spreadsheet which is accessible through [Bertha API](https://github.com/ft-interactive/bertha/wiki/Tutorial).
-The service exposes endpoints for getting all the curated authors' UUIDs and for getting authors by uuid.
+The service exposes endpoints for getting all the curated authors' membership UUIDs and for getting memberships by uuid.
+The service consumes data specified by two Google Google spreadsheet, one contains authors' data and the another one contains authors roles.
+Spreadsheet data is consumed by the service through [Bertha API](https://github.com/ft-interactive/bertha/wiki/Tutorial), which transforms Google spreadsheets data to JSON.
+Output examples for authors and roles JSON from Berta are provided below.
+
+####Bertha Authors
+```
+[
+  {
+    "name": "Martin Wolf",
+    "role": "Columnist",
+    "jobtitle": "Chief Economics Commentator",
+    "email": "email@ft.com",
+    "imageurl": "http//image.site.com/Martin_Wolf.png",
+    "biography": "<p>Martin Wolf is chief economics commentator at the Financial Times, London. He was awarded the CBE (Commander of the British Empire) in 2000 “for services to financial journalism”.</p>",
+    "twitterhandle": "@martinwolf_",
+    "uuid": "daf5fed2-013c-468d-85c4-aee779b8aa54",
+    "tmeidentifier": "Q0ItMDAwMDkwMA==-QXV0aG9ycw==",
+    "membershipuuid": "03ca31b5-534a-4d26-bd09-3532b04640d5"
+  },
+  {
+    "name": "Lucy Kellaway",
+    "role": "Columnist",
+    "jobtitle": "Associate Editor and Work & Career Columnist",
+    "email": "email@ft.com",
+    "imageurl": "http//image.site.com/Lucy_Kellaway.png",
+    "biography": "<p>Lucy Kellaway is an Associate Editor and management columnist of the FT. For the past 15 years her weekly Monday column has poked fun at management fads and jargon and celebrated the ups and downs of office life.</p>",
+    "twitterhandle": null,
+    "uuid": "daf5fed2-013c-468d-85c4-aee779b8aa55",
+    "tmeidentifier": "Q0ItMDAwMDkyNg==-QXV0aG9ycw==",
+    "membershipuuid": "7318d8eb-5d48-4008-8744-aa3f18957216"
+  },
+  ...
+]  
+```
+
+####Bertha Roles
+```
+[
+  {
+    "uuid": "33ee38a4-c677-4952-a141-2ae14da3aedd",
+    "preflabel": "Journalist"
+  },
+  {
+    "uuid": "7ef75a6a-b6bf-4eb7-a1da-03e0acabef1b",
+    "preflabel": "Columnist"
+  }
+]
+```
 
 # How to run
 
@@ -40,6 +87,7 @@ A response example is provided below.
 ##IDs
 `GET /transformers/author-memberships/__ids` returns the list of membership's UUIDs available to be transformed. 
 The output is a sequence of JSON objects, however the returned `Content-Type` header is `text\plain`.
+This output data will be consumed as a stream by the [concept publisher](https://github.com/Financial-Times/concept-publisher).
 A response example is provided below.
 
 ```
