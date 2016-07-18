@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-	app := cli.App("author-memberhips-transformer", "A RESTful API for transforming Bertha Curated Authors to UP People Memberships JSON")
+	app := cli.App("curated-authors-memberships-transformer", "A RESTful API for transforming Bertha Curated Authors to UP People Memberships JSON")
 
 	port := app.Int(cli.IntOpt{
 		Name:   "port",
@@ -66,9 +66,9 @@ func setupServiceHandlers(mh membershipHandler) http.Handler {
 	r.HandleFunc("/__health", v1a.Handler("Curated Authors Membership Transformer", "Checks for accessing Bertha", mh.AuthorsHealthCheck(), mh.RolesHealthCheck()))
 	r.HandleFunc(status.GTGPath, mh.GoodToGo)
 
-	r.HandleFunc("/transformers/author-memberships/__count", mh.getMembershipsCount).Methods("GET")
-	r.HandleFunc("/transformers/author-memberships/__ids", mh.getMembershipUuids).Methods("GET")
-	r.HandleFunc("/transformers/author-memberships/{uuid}", mh.getMembershipByUuid).Methods("GET")
+	r.HandleFunc("/transformers/memberships/__count", mh.getMembershipsCount).Methods("GET")
+	r.HandleFunc("/transformers/memberships/__ids", mh.getMembershipUuids).Methods("GET")
+	r.HandleFunc("/transformers/memberships/{uuid}", mh.getMembershipByUuid).Methods("GET")
 
 	return r
 }

@@ -1,6 +1,6 @@
-# author-memberships-transformer
+# curated-authors-memberships-transformer
 
-[![CircleCI](https://circleci.com/gh/Financial-Times/author-memberships-transformer.svg?style=svg)](https://circleci.com/gh/Financial-Times/author-memberships-transformer)
+[![CircleCI](https://circleci.com/gh/Financial-Times/curated-authors-memberships-transformer.svg?style=svg)](https://circleci.com/gh/Financial-Times/curated-authors-memberships-transformer)
 
 Retrieves author data curated by editorial people and transforms it to People Memberships according to UP JSON model.
 The service exposes endpoints for getting all the curated authors' membership UUIDs and for getting memberships by uuid.
@@ -57,27 +57,27 @@ Output examples for authors and roles JSON from Berta are provided below.
 
 ## Locally: 
 
-`go get github.com/Financial-Times/author-memberships-transformer`
+`go get github.com/Financial-Times/curated-authors-memberships-transformer`
 
-`$GOPATH/bin/ ./author-memberships-transformer --bertha-authors-source-url=<BERTHA_AUTHORS_SOURCE_URL> --bertha-roles-source-url=<BERTHA_ROLES_SOURCE_URL> --port=8080`                
+`$GOPATH/bin/ ./curated-authors-memberships-transformer --bertha-authors-source-url=<BERTHA_AUTHORS_SOURCE_URL> --bertha-roles-source-url=<BERTHA_ROLES_SOURCE_URL> --port=8080`                
 
 ```
 export|set PORT=8080
 export|set BERTHA_AUTHORS_SOURCE_URL="http://.../Authors"
 export|set BERTHA_ROLES_SOURCE_URL="http://.../Roles"
-$GOPATH/bin/author-memberships-transformer
+$GOPATH/bin/curated-authors-memberships-transformer
 ```
 
 ## With Docker:
 
-`docker build -t coco/author-memberships-transformer .`
+`docker build -t coco/curated-authors-memberships-transformer .`
 
-`docker run -ti --env BERTHA_AUTHORS_SOURCE_URL=<bertha_authors_url> --env BERTHA_ROLES_SOURCE_URL=<bertha_roles_url> coco/author-memberships-transformer`
+`docker run -ti --env BERTHA_AUTHORS_SOURCE_URL=<bertha_authors_url> --env BERTHA_ROLES_SOURCE_URL=<bertha_roles_url> coco/curated-authors-memberships-transformer`
 
 #Endpoints
 
 ##Count
-`GET /transformers/author-memberships/__count` returns the number of available memberships to be transformed as plain text.
+`GET /transformers/memberships/__count` returns the number of available memberships to be transformed as plain text.
 A response example is provided below.
 
 ```
@@ -85,7 +85,7 @@ A response example is provided below.
 ```
 
 ##IDs
-`GET /transformers/author-memberships/__ids` returns the list of membership's UUIDs available to be transformed. 
+`GET /transformers/memberships/__ids` returns the list of membership's UUIDs available to be transformed. 
 The output is a sequence of JSON objects, however the returned `Content-Type` header is `text\plain`.
 This output data will be consumed as a stream by the [concept publisher](https://github.com/Financial-Times/concept-publisher).
 A response example is provided below.
@@ -95,7 +95,7 @@ A response example is provided below.
 ```
 
 ##Authors by UUID
-`GET /transformers/author-memberships/{uuid}` returns author membership data of the given uuid. 
+`GET /transformers/memberships/{uuid}` returns author membership data of the given uuid. 
 A response example is provided below.
 
 ```
