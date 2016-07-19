@@ -14,5 +14,5 @@ type alternativeIdentifiers struct {
 }
 
 type membershipRole struct {
-	RoleUUID string `json:"roleuuid,omitempty"`
+	RoleUUID string `json:"roleUuid,omitempty"`
 }

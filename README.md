@@ -115,7 +115,7 @@ A response example is provided below.
   },
   "membershipRoles": [
     {
-      "roleuuid": "7ef75a6a-b6bf-4eb7-a1da-03e0acabef1b"
+      "roleUuid": "7ef75a6a-b6bf-4eb7-a1da-03e0acabef1b"
     }
   ]
 }
