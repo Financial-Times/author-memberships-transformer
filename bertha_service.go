@@ -60,14 +60,16 @@ func (bs *berthaService) refreshMembershipCache() error {
 }
 
 func (bs *berthaService) populateMembershipMap(authors []author, roles []berthaRole) error {
-	rolesMap := make(map[string]berthaRole)
+	nameRolesMap := make(map[string]berthaRole)
+	uuidRolesMap := make(map[string]berthaRole)
 
 	for _, r := range roles {
-		rolesMap[r.Preflabel] = r
+		nameRolesMap[r.Preflabel] = r
+		uuidRolesMap[r.UUID] = r
 	}
 
 	for _, a := range authors {
-		m, err := bs.transformer.toMembership(a, rolesMap)
+		m, err := bs.transformer.toMembership(a, uuidRolesMap, nameRolesMap)
 		if err != nil {
 			bs.membershipsMap = make(map[string]membership)
 			return err
