@@ -4,7 +4,7 @@
 
 Retrieves author data curated by editorial people and transforms it to People Memberships according to UP JSON model.
 The service exposes endpoints for getting all the curated authors' membership UUIDs and for getting memberships by uuid.
-The service consumes data specified by two Google Google spreadsheet, one contains authors' data and the another one contains authors roles.
+The service consumes data specified by two Google spreadsheet, one contains authors' data and the another one contains authors' roles.
 Spreadsheet data is consumed by the service through [Bertha API](https://github.com/ft-interactive/bertha/wiki/Tutorial), which transforms Google spreadsheets data to JSON.
 Output examples for authors and roles JSON from Berta are provided below.
 
@@ -98,8 +98,8 @@ A response example is provided below.
 {"id":"5baaf5a4-2d9f-11e6-a100-1316a778acd2"} {"id":"5baaf5a4-2d9f-11e6-a100-1316a778acd5"} {"id":"5baaf5a4-2d9f-11e6-a100-1316a778acd9"} {"id":"5baaf5a4-2d9f-11e6-a100-1316a778acd8"} {"id":"5baaf5a4-2d9f-11e6-a100-1316a778acd0"} {"id":"daf5fed2-013c-468d-85c4-aee779b8aa53"} {"id":"daf5fed2-013c-468d-85c4-aee779b8aa51"} 
 ```
 
-##Authors by UUID
-`GET /transformers/memberships/{uuid}` returns author membership data of the given uuid. 
+##Membership by UUID
+`GET /transformers/memberships/{uuid}` returns author membership data of the given membership uuid. 
 A response example is provided below.
 
 ```
