@@ -31,35 +31,22 @@ func (mh *membershipHandler) refreshMembershipCache(writer http.ResponseWriter, 
 }
 
 func (mh *membershipHandler) getMembershipsCount(writer http.ResponseWriter, req *http.Request) {
-	c, err := mh.membershipService.getMembershipCount()
-	if err != nil {
-		writeJSONMessage(writer, err.Error(), http.StatusInternalServerError)
-	} else {
-		var buffer bytes.Buffer
-		buffer.WriteString(fmt.Sprintf(`%v`, c))
-		buffer.WriteTo(writer)
-	}
+	c := mh.membershipService.getMembershipCount()
+	var buffer bytes.Buffer
+	buffer.WriteString(fmt.Sprintf(`%v`, c))
+	buffer.WriteTo(writer)
 }
 
 func (mh *membershipHandler) getMembershipUuids(writer http.ResponseWriter, req *http.Request) {
-	uuids, err := mh.membershipService.getMembershipUuids()
-	if err != nil {
-		writeJSONMessage(writer, err.Error(), http.StatusInternalServerError)
-	} else {
-		writeStreamResponse(uuids, writer)
-	}
+	uuids := mh.membershipService.getMembershipUuids()
+	writeStreamResponse(uuids, writer)
 }
 
 func (mh *membershipHandler) getMembershipByUuid(writer http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	uuid := vars["uuid"]
-
-	m, err := mh.membershipService.getMembershipByUuid(uuid)
-	if err != nil {
-		writeJSONMessage(writer, err.Error(), http.StatusInternalServerError)
-	} else {
-		writeJSONResponse(m, !reflect.DeepEqual(m, membership{}), writer)
-	}
+	m := mh.membershipService.getMembershipByUuid(uuid)
+	writeJSONResponse(m, !reflect.DeepEqual(m, membership{}), writer)
 }
 
 func (mh *membershipHandler) AuthorsHealthCheck() v1a.Check {

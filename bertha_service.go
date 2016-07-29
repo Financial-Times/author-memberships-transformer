@@ -7,6 +7,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/gregjones/httpcache"
 	"net/http"
+	"sync"
 )
 
 var client = httpcache.NewMemoryCacheTransport().Client()
@@ -16,17 +17,23 @@ type berthaService struct {
 	rolesUrl       string
 	membershipsMap map[string]membership
 	transformer    transformer
+	mutex          *sync.Mutex
 }
 
-func newBerthaService(authorsUrl string, rolesUrl string) *berthaService {
-	return &berthaService{
+func newBerthaService(authorsUrl string, rolesUrl string) (*berthaService, error) {
+	bs := &berthaService{
 		authorsUrl:  authorsUrl,
 		rolesUrl:    rolesUrl,
 		transformer: &berthaTransformer{},
+		mutex:       &sync.Mutex{},
 	}
+	err := bs.refreshMembershipCache()
+	return bs, err
 }
 
 func (bs *berthaService) refreshMembershipCache() error {
+	bs.mutex.Lock()
+	defer bs.mutex.Unlock()
 	bs.membershipsMap = make(map[string]membership)
 	authResp, authErr := bs.callBerthaService(bs.authorsUrl)
 	if authErr != nil {
@@ -79,35 +86,26 @@ func (bs *berthaService) populateMembershipMap(authors []author, roles []berthaR
 	return nil
 }
 
-func (bs *berthaService) getMembershipCount() (int, error) {
-	if len(bs.membershipsMap) == 0 {
-		if err := bs.refreshMembershipCache(); err != nil {
-			return -1, err
-		}
-	}
-	return len(bs.membershipsMap), nil
+func (bs *berthaService) getMembershipCount() int {
+	bs.mutex.Lock()
+	defer bs.mutex.Unlock()
+	return len(bs.membershipsMap)
 }
 
-func (bs *berthaService) getMembershipUuids() ([]string, error) {
-	if len(bs.membershipsMap) == 0 {
-		if err := bs.refreshMembershipCache(); err != nil {
-			return []string{}, err
-		}
-	}
+func (bs *berthaService) getMembershipUuids() []string {
+	bs.mutex.Lock()
+	defer bs.mutex.Unlock()
 	uuids := make([]string, 0)
 	for uuid, _ := range bs.membershipsMap {
 		uuids = append(uuids, uuid)
 	}
-	return uuids, nil
+	return uuids
 }
 
-func (bs *berthaService) getMembershipByUuid(uuid string) (membership, error) {
-	if len(bs.membershipsMap) == 0 {
-		if err := bs.refreshMembershipCache(); err != nil {
-			return membership{}, err
-		}
-	}
-	return bs.membershipsMap[uuid], nil
+func (bs *berthaService) getMembershipByUuid(uuid string) membership {
+	bs.mutex.Lock()
+	defer bs.mutex.Unlock()
+	return bs.membershipsMap[uuid]
 }
 
 func (bs *berthaService) callBerthaService(url string) (res *http.Response, err error) {
