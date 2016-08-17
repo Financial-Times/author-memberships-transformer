@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"reflect"
+
 	"github.com/Financial-Times/go-fthealth/v1a"
 	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
-	"net/http"
-	"reflect"
 )
 
 type membershipHandler struct {

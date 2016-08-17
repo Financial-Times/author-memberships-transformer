@@ -3,19 +3,22 @@ package main
 import (
 	"bytes"
 	"errors"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 var curatedAuthorsMembershipTransformer *httptest.Server
 
-var uuids = []string{aMembership.UUID, "e06be0f8-0426-4ee8-80e3-3da37255818a"}
-var expectedStreamOutput = `{"id":"` + aMembership.UUID + `"} {"id":"e06be0f8-0426-4ee8-80e3-3da37255818a"} `
+//For fixtures see test_fixtures.go
+
+var uuids = []string{expectedMembershipUUID, "e06be0f8-0426-4ee8-80e3-3da37255818a"}
+var expectedStreamOutput = `{"id":"` + expectedMembershipUUID + `"} {"id":"e06be0f8-0426-4ee8-80e3-3da37255818a"} `
 
 type MockedBerthaService struct {
 	mock.Mock
@@ -75,7 +78,7 @@ func TestShouldReturn200AndMembershipCount(t *testing.T) {
 	assert.Equal(t, "2", actualOutput, "Response body should contain the count of available authors")
 }
 
-func TestShouldReturn200WhenMembershipChacheIsRefreshed(t *testing.T) {
+func TestShouldReturn200WhenMembershipCacheIsRefreshed(t *testing.T) {
 
 	mbs := new(MockedBerthaService)
 	mbs.On("refreshMembershipCache").Return(nil)
@@ -117,11 +120,11 @@ func getStringFromReader(r io.Reader) string {
 
 func TestShouldReturn200AndTransformedMembership(t *testing.T) {
 	mbs := new(MockedBerthaService)
-	mbs.On("getMembershipByUuid", aMembership.UUID).Return(aMembership, nil)
+	mbs.On("getMembershipByUuid", expectedMembershipUUID).Return(expectedMembership, nil)
 	startCuratedAuthorsMembershipTransformer(mbs)
 	defer curatedAuthorsMembershipTransformer.Close()
 
-	resp, err := http.Get(curatedAuthorsMembershipTransformer.URL + "/transformers/memberships/" + aMembership.UUID)
+	resp, err := http.Get(curatedAuthorsMembershipTransformer.URL + "/transformers/memberships/" + expectedMembershipUUID)
 	if err != nil {
 		panic(err)
 	}
@@ -136,16 +139,16 @@ func TestShouldReturn200AndTransformedMembership(t *testing.T) {
 	expectedOutput := getStringFromReader(file)
 	actualOutput := getStringFromReader(resp.Body)
 
-	assert.Equal(t, expectedOutput, actualOutput, "Response body should be a valid membership")
+	assert.JSONEq(t, expectedOutput, actualOutput, "Response body should be a valid membership")
 }
 
 func TestShouldReturn404WhenMembershipIsNotFound(t *testing.T) {
 	mbs := new(MockedBerthaService)
-	mbs.On("getMembershipByUuid", aMembership.UUID).Return(membership{}, nil)
+	mbs.On("getMembershipByUuid", expectedMembershipUUID).Return(membership{}, nil)
 	startCuratedAuthorsMembershipTransformer(mbs)
 	defer curatedAuthorsMembershipTransformer.Close()
 
-	resp, err := http.Get(curatedAuthorsMembershipTransformer.URL + "/transformers/memberships/" + aMembership.UUID)
+	resp, err := http.Get(curatedAuthorsMembershipTransformer.URL + "/transformers/memberships/" + expectedMembershipUUID)
 	if err != nil {
 		panic(err)
 	}
@@ -186,11 +189,11 @@ func TestShouldReturn500WhenMembershipUuidsReturnError(t *testing.T) {
 
 func TestShouldReturn500WhenMembershipReturnsError(t *testing.T) {
 	mbs := new(MockedBerthaService)
-	mbs.On("getMembershipByUuid", aMembership.UUID).Return(membership{}, errors.New("I am a zombie"))
+	mbs.On("getMembershipByUuid", expectedMembershipUUID).Return(membership{}, errors.New("I am a zombie"))
 	startCuratedAuthorsMembershipTransformer(mbs)
 	defer curatedAuthorsMembershipTransformer.Close()
 
-	resp, err := http.Get(curatedAuthorsMembershipTransformer.URL + "/transformers/memberships/" + aMembership.UUID)
+	resp, err := http.Get(curatedAuthorsMembershipTransformer.URL + "/transformers/memberships/" + expectedMembershipUUID)
 	if err != nil {
 		panic(err)
 	}

@@ -1,1 +1,13 @@
-{"uuid":"0311bc2c-1dc1-489b-a202-59252c28d2de","prefLabel":"Avengers member","personUuid":"1eaeabeb-01ef-42dc-bf95-459e9087a763","organisationUuid":"dac01f07-4b6d-3615-8532-a56752cc7e5f","alternativeIdentifiers":{"uuids":["0311bc2c-1dc1-489b-a202-59252c28d2de"]},"membershipRoles":[{"roleUuid":"b4f06685-9f58-40af-850f-07f1585fab73"},{"roleUuid":"93e60bde-dc80-4ed3-8cc1-a19346c52014"}]}
+{
+  "uuid":"78a23be4-b7b0-392a-a900-582a0dbe383b",
+  "prefLabel":"Avengers member",
+  "personUuid":"0f07d468-fc37-3c44-bf19-a81f2aae9f36",
+  "organisationUuid":"dac01f07-4b6d-3615-8532-a56752cc7e5f",
+  "alternativeIdentifiers":{
+    "uuids":["78a23be4-b7b0-392a-a900-582a0dbe383b"]
+  },
+  "membershipRoles":[
+    {"roleUuid":"b4f06685-9f58-40af-850f-07f1585fab73"},
+    {"roleUuid":"93e60bde-dc80-4ed3-8cc1-a19346c52014"}
+  ]
+}
