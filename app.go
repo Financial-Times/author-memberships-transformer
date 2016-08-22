@@ -56,7 +56,7 @@ func main() {
 		log.Infof("Listening on [%d].", *port)
 		errServe := http.ListenAndServe(fmt.Sprintf(":%d", *port), nil)
 		if errServe != nil {
-			log.Printf("Web server failed: [%v].", err)
+			log.Printf("Web server failed: [%v].", errServe)
 		}
 	}
 
