@@ -1,11 +1,12 @@
 package main
 
 import (
-	"errors"
 	"fmt"
+
+	"github.com/pborman/uuid"
 )
 
-const ftUuid = "dac01f07-4b6d-3615-8532-a56752cc7e5f"
+const ftUUID = "dac01f07-4b6d-3615-8532-a56752cc7e5f"
 
 type berthaTransformer struct {
 }
@@ -18,15 +19,19 @@ func (bt *berthaTransformer) toMembership(a author, uuidRolesMap map[string]bert
 		return membership{}, err
 	}
 
+	personUUID := uuid.NewMD5(uuid.UUID{}, []byte(a.TmeIdentifier)).String()
+
+	membershipUUID := uuid.NewMD5(uuid.UUID{}, []byte(personUUID+"_MEMBER_"+ftUUID)).String()
+
 	altIds := alternativeIdentifiers{
-		UUIDS: []string{a.Membershipuuid},
+		UUIDS: []string{membershipUUID},
 	}
 
 	m := membership{
-		UUID:                   a.Membershipuuid,
+		UUID:                   membershipUUID,
 		PrefLabel:              a.Jobtitle,
-		PersonUUID:             a.UUID,
-		OrganisationUUID:       ftUuid,
+		PersonUUID:             personUUID,
+		OrganisationUUID:       ftUUID,
 		AlternativeIdentifiers: altIds,
 		MembershipRoles:        memRoles,
 	}
@@ -37,24 +42,24 @@ func (bt *berthaTransformer) buildMembershipRoles(roleName string, uuidRolesMap 
 	berthaRole := nameRolesMap[roleName]
 	memRoles := []membershipRole{}
 	if berthaRole.UUID == "" {
-		return []membershipRole{}, errors.New(fmt.Sprintf(`Role UUID is not found for "%s"`, berthaRole.Preflabel))
+		return []membershipRole{}, fmt.Errorf(`Role UUID is not found for "%s"`, berthaRole.Preflabel)
 	}
 
-	for parentRoleUuid := berthaRole.UUID; parentRoleUuid != ""; {
-		berthaRole = uuidRolesMap[parentRoleUuid]
+	for parentRoleUUID := berthaRole.UUID; parentRoleUUID != ""; {
+		berthaRole = uuidRolesMap[parentRoleUUID]
 		memRole, err := bt.transformRole(berthaRole)
 		if err != nil {
 			return []membershipRole{}, err
 		}
 		memRoles = append(memRoles, memRole)
-		parentRoleUuid = berthaRole.ParentUuid
+		parentRoleUUID = berthaRole.ParentUUID
 	}
 	return memRoles, nil
 }
 
 func (bt *berthaTransformer) transformRole(br berthaRole) (membershipRole, error) {
 	if br.UUID == "" {
-		return membershipRole{}, errors.New(fmt.Sprintf(`Role UUID is not found for "%s"`, br.Preflabel))
+		return membershipRole{}, fmt.Errorf(`Role UUID is not found for "%s"`, br.Preflabel)
 	}
 	return membershipRole{RoleUUID: br.UUID}, nil
 }

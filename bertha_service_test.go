@@ -1,14 +1,15 @@
 package main
 
 import (
-	"github.com/gorilla/handlers"
-	"github.com/gorilla/mux"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
+
+	"github.com/gorilla/handlers"
+	"github.com/gorilla/mux"
+	"github.com/stretchr/testify/assert"
 )
 
 const etag = "W/\"75e-78600296\""
@@ -18,15 +19,15 @@ const authorsBerthaOutput = "test-resources/bertha-authors-output.json"
 const rolesBerthaOutput = "test-resources/bertha-roles-output.json"
 
 var membership1 = membership{
-	UUID:                   "e6e8b382-4833-11e6-beb8-9e71128cae77",
+	UUID:                   expectedMembershipUUID,
 	PrefLabel:              "Chief Economics Commentator",
-	PersonUUID:             "daf5fed2-013c-468d-85c4-aee779b8aa53",
-	OrganisationUUID:       "dac01f07-4b6d-3615-8532-a56752cc7e5f",
-	AlternativeIdentifiers: alternativeIdentifiers{UUIDS: []string{"e6e8b382-4833-11e6-beb8-9e71128cae77"}},
+	PersonUUID:             expectedAuthorUUID,
+	OrganisationUUID:       ftUUID,
+	AlternativeIdentifiers: alternativeIdentifiers{UUIDS: []string{expectedMembershipUUID}},
 	MembershipRoles:        []membershipRole{membershipRole{RoleUUID: "7ef75a6a-b6bf-4eb7-a1da-03e0acabef1b"}},
 }
 var membership2 = membership{
-	UUID: "c721a241-9250-4c77-9620-8abb08027686",
+	UUID: "a1c08d1f-9c19-370b-af34-80aa6cf3c0ad",
 }
 
 type berthaMock struct {
@@ -104,8 +105,8 @@ func TestShouldReturnMembershipsUuids(t *testing.T) {
 	uuids := bs.getMembershipUuids()
 
 	assert.Equal(t, 2, len(uuids), "Bertha should return 2 authors")
-	assert.Equal(t, true, contains(uuids, membership1.UUID), "It should contain membership1 UUID")
-	assert.Equal(t, true, contains(uuids, membership2.UUID), "It should contain membership2 UUID")
+	assert.Equal(t, true, contains(uuids, membership1.UUID), "actual UUIDS=%s should contain expected membership1 UUID=%s", uuids, membership1.UUID)
+	assert.Equal(t, true, contains(uuids, membership2.UUID), "actual UUIDS=%s should contain expected membership2 UUID=%s", uuids, membership2.UUID)
 }
 
 func TestShouldReturnSingleMembership(t *testing.T) {
