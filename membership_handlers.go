@@ -54,7 +54,7 @@ func (mh *membershipHandler) AuthorsHealthCheck() v1a.Check {
 	return v1a.Check{
 		BusinessImpact:   "Unable to respond to request for curated author data from Bertha",
 		Name:             "Check connectivity to Bertha Authors Spreadsheet",
-		PanicGuide:       "https://sites.google.com/a/ft.com/ft-technology-service-transition/home/run-book-library/curated-authors-membership-transfomer",
+		PanicGuide:       "https://sites.google.com/a/ft.com/ft-technology-service-transition/home/run-book-library/curated-authors-memberships-transformer",
 		Severity:         1,
 		TechnicalSummary: "Cannot connect to Bertha to be able to supply curated authors information",
 		Checker:          mh.authorsChecker,
