@@ -78,7 +78,7 @@ The transformer loads Bertha data in memory at startup time by default. Every ti
 
 ##Count
 `GET /transformers/memberships/__count` returns the number of available memberships to be transformed as plain text.
-A response example is provided below.
+A response example is provided below. Calling this endpoint will trigger cache refresh by default.
 
 ```
 2

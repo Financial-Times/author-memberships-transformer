@@ -62,7 +62,8 @@ func startCuratedAuthorsMembershipTransformer(bs *MockedBerthaService) {
 
 func TestShouldReturn200AndMembershipCount(t *testing.T) {
 	mbs := new(MockedBerthaService)
-	mbs.On("getMembershipCount").Return(2, nil)
+	mbs.On("getMembershipCount").Return(2)
+	mbs.On("refreshMembershipCache").Return(nil)
 	startCuratedAuthorsMembershipTransformer(mbs)
 	defer curatedAuthorsMembershipTransformer.Close()
 
@@ -76,6 +77,25 @@ func TestShouldReturn200AndMembershipCount(t *testing.T) {
 	assert.Equal(t, "text/plain; charset=utf-8", resp.Header.Get("Content-Type"), "Content-Type should be text/plain")
 	actualOutput := getStringFromReader(resp.Body)
 	assert.Equal(t, "2", actualOutput, "Response body should contain the count of available authors")
+}
+
+func TestShouldReturn500WhenMembershipCountIsCalledAndCacheRefreshFails(t *testing.T) {
+	mbs := new(MockedBerthaService)
+	mbs.On("getMembershipCount").Return(2)
+	mbs.On("refreshMembershipCache").Return(errors.New("Exterminate!"))
+	startCuratedAuthorsMembershipTransformer(mbs)
+	defer curatedAuthorsMembershipTransformer.Close()
+
+	resp, err := http.Get(curatedAuthorsMembershipTransformer.URL + "/transformers/memberships/__count")
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	assert.Equal(t, http.StatusInternalServerError, resp.StatusCode, "Response status should be 500")
+	assert.Equal(t, "application/json", resp.Header.Get("Content-Type"), "Content-Type should be application/json")
+	actualOutput := getStringFromReader(resp.Body)
+	assert.Equal(t, "{\"message\": \"Exterminate!\"}\n", actualOutput, "Response body should contain the error message")
 }
 
 func TestShouldReturn200WhenMembershipCacheIsRefreshed(t *testing.T) {

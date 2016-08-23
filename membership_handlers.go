@@ -32,10 +32,15 @@ func (mh *membershipHandler) refreshMembershipCache(writer http.ResponseWriter, 
 }
 
 func (mh *membershipHandler) getMembershipsCount(writer http.ResponseWriter, req *http.Request) {
-	c := mh.membershipService.getMembershipCount()
-	var buffer bytes.Buffer
-	buffer.WriteString(fmt.Sprintf(`%v`, c))
-	buffer.WriteTo(writer)
+	err := mh.membershipService.refreshMembershipCache()
+	if err != nil {
+		writeJSONMessage(writer, err.Error(), http.StatusInternalServerError)
+	} else {
+		c := mh.membershipService.getMembershipCount()
+		var buffer bytes.Buffer
+		buffer.WriteString(fmt.Sprintf(`%v`, c))
+		buffer.WriteTo(writer)
+	}
 }
 
 func (mh *membershipHandler) getMembershipUuids(writer http.ResponseWriter, req *http.Request) {
@@ -111,6 +116,7 @@ func writeJSONResponse(obj interface{}, found bool, writer http.ResponseWriter) 
 }
 
 func writeJSONMessage(w http.ResponseWriter, errorMsg string, statusCode int) {
+	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
 	fmt.Fprintln(w, fmt.Sprintf("{\"message\": \"%s\"}", errorMsg))
 }
