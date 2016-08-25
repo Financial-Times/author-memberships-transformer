@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-//For fixtures see test_fixtures.go
+//For fixtures see fixtures_test.go
 
 func TestShouldTransformAuthorToPersonSuccessfully(t *testing.T) {
 	transformer := berthaTransformer{}

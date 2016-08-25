@@ -32,10 +32,11 @@ func (mh *membershipHandler) refreshMembershipCache(writer http.ResponseWriter, 
 }
 
 func (mh *membershipHandler) getMembershipsCount(writer http.ResponseWriter, req *http.Request) {
-	c, err := mh.membershipService.getMembershipCount()
+	err := mh.membershipService.refreshMembershipCache()
 	if err != nil {
 		writeJSONMessage(writer, err.Error(), http.StatusInternalServerError)
 	} else {
+		c := mh.membershipService.getMembershipCount()
 		var buffer bytes.Buffer
 		buffer.WriteString(fmt.Sprintf(`%v`, c))
 		buffer.WriteTo(writer)
@@ -43,31 +44,22 @@ func (mh *membershipHandler) getMembershipsCount(writer http.ResponseWriter, req
 }
 
 func (mh *membershipHandler) getMembershipUuids(writer http.ResponseWriter, req *http.Request) {
-	uuids, err := mh.membershipService.getMembershipUuids()
-	if err != nil {
-		writeJSONMessage(writer, err.Error(), http.StatusInternalServerError)
-	} else {
-		writeStreamResponse(uuids, writer)
-	}
+	uuids := mh.membershipService.getMembershipUuids()
+	writeStreamResponse(uuids, writer)
 }
 
 func (mh *membershipHandler) getMembershipByUuid(writer http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	uuid := vars["uuid"]
-
-	m, err := mh.membershipService.getMembershipByUuid(uuid)
-	if err != nil {
-		writeJSONMessage(writer, err.Error(), http.StatusInternalServerError)
-	} else {
-		writeJSONResponse(m, !reflect.DeepEqual(m, membership{}), writer)
-	}
+	m := mh.membershipService.getMembershipByUuid(uuid)
+	writeJSONResponse(m, !reflect.DeepEqual(m, membership{}), writer)
 }
 
 func (mh *membershipHandler) AuthorsHealthCheck() v1a.Check {
 	return v1a.Check{
 		BusinessImpact:   "Unable to respond to request for curated author data from Bertha",
 		Name:             "Check connectivity to Bertha Authors Spreadsheet",
-		PanicGuide:       "https://sites.google.com/a/ft.com/ft-technology-service-transition/home/run-book-library/curated-authors-membership-transfomer",
+		PanicGuide:       "https://sites.google.com/a/ft.com/ft-technology-service-transition/home/run-book-library/curated-authors-memberships-transformer",
 		Severity:         1,
 		TechnicalSummary: "Cannot connect to Bertha to be able to supply curated authors information",
 		Checker:          mh.authorsChecker,
@@ -124,6 +116,7 @@ func writeJSONResponse(obj interface{}, found bool, writer http.ResponseWriter) 
 }
 
 func writeJSONMessage(w http.ResponseWriter, errorMsg string, statusCode int) {
+	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
 	fmt.Fprintln(w, fmt.Sprintf("{\"message\": \"%s\"}", errorMsg))
 }

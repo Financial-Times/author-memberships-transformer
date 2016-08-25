@@ -85,11 +85,10 @@ func TestShouldReturnMembershipCount(t *testing.T) {
 	berthaRolesMock.start("happy")
 	defer berthaRolesMock.stop()
 
-	bs := newBerthaService(berthaAuthorsMock.getUrl(), berthaRolesMock.getUrl())
-
-	c, err := bs.getMembershipCount()
-
+	bs, err := newBerthaService(berthaAuthorsMock.getUrl(), berthaRolesMock.getUrl())
 	assert.Nil(t, err)
+
+	c := bs.getMembershipCount()
 	assert.Equal(t, 2, c, "Bertha should return 2 authors")
 }
 
@@ -99,12 +98,12 @@ func TestShouldReturnMembershipsUuids(t *testing.T) {
 	berthaRolesMock.start("happy")
 	defer berthaRolesMock.stop()
 
-	bs := newBerthaService(berthaAuthorsMock.getUrl(), berthaRolesMock.getUrl())
+	bs, err := newBerthaService(berthaAuthorsMock.getUrl(), berthaRolesMock.getUrl())
+	assert.Nil(t, err)
 
 	bs.getMembershipCount()
-	uuids, err := bs.getMembershipUuids()
+	uuids := bs.getMembershipUuids()
 
-	assert.Nil(t, err)
 	assert.Equal(t, 2, len(uuids), "Bertha should return 2 authors")
 	assert.Equal(t, true, contains(uuids, membership1.UUID), "actual UUIDS=%s should contain expected membership1 UUID=%s", uuids, membership1.UUID)
 	assert.Equal(t, true, contains(uuids, membership2.UUID), "actual UUIDS=%s should contain expected membership2 UUID=%s", uuids, membership2.UUID)
@@ -116,12 +115,12 @@ func TestShouldReturnSingleMembership(t *testing.T) {
 	berthaRolesMock.start("happy")
 	defer berthaRolesMock.stop()
 
-	bs := newBerthaService(berthaAuthorsMock.getUrl(), berthaRolesMock.getUrl())
+	bs, err := newBerthaService(berthaAuthorsMock.getUrl(), berthaRolesMock.getUrl())
+	assert.Nil(t, err)
 
 	bs.getMembershipCount()
-	m, err := bs.getMembershipByUuid(membership1.UUID)
+	m := bs.getMembershipByUuid(membership1.UUID)
 
-	assert.Nil(t, err)
 	assert.Equal(t, membership1, m, "The membership should be membership1")
 }
 
@@ -131,10 +130,11 @@ func TestShouldReturnEmptyMembershipWhenMembershipIsNotAvailable(t *testing.T) {
 	berthaRolesMock.start("happy")
 	defer berthaRolesMock.stop()
 
-	bs := newBerthaService(berthaAuthorsMock.getUrl(), berthaRolesMock.getUrl())
-	m, err := bs.getMembershipByUuid("7f8bd61a-3575-4d32-a758-0fa41cbcc826")
-
+	bs, err := newBerthaService(berthaAuthorsMock.getUrl(), berthaRolesMock.getUrl())
 	assert.Nil(t, err)
+
+	m := bs.getMembershipByUuid("7f8bd61a-3575-4d32-a758-0fa41cbcc826")
+
 	assert.Equal(t, membership{}, m, "The membership should be empty")
 }
 
@@ -144,21 +144,16 @@ func TestShouldReturnErrorWhenBerthaAuthorsIsUnhappy(t *testing.T) {
 	berthaRolesMock.start("happy")
 	defer berthaRolesMock.stop()
 
-	bs := newBerthaService(berthaAuthorsMock.getUrl(), berthaRolesMock.getUrl())
-
-	err := bs.refreshMembershipCache()
+	bs, err := newBerthaService(berthaAuthorsMock.getUrl(), berthaRolesMock.getUrl())
 	assert.NotNil(t, err)
 
-	c, err := bs.getMembershipCount()
-	assert.NotNil(t, err)
-	assert.Equal(t, -1, c, "It should return -1")
+	c := bs.getMembershipCount()
+	assert.Equal(t, 0, c, "It should return 0")
 
-	uuids, err := bs.getMembershipUuids()
-	assert.NotNil(t, err)
+	uuids := bs.getMembershipUuids()
 	assert.Equal(t, 0, len(uuids), "It should return 0 UUIDs")
 
-	m, err := bs.getMembershipByUuid(membership1.UUID)
-	assert.NotNil(t, err)
+	m := bs.getMembershipByUuid(membership1.UUID)
 	assert.Equal(t, membership{}, m, "The membership should be empty")
 }
 
@@ -168,21 +163,19 @@ func TestShouldReturnErrorWhenBerthaRolesIsUnhappy(t *testing.T) {
 	berthaRolesMock.start("unhappy")
 	defer berthaRolesMock.stop()
 
-	bs := newBerthaService(berthaAuthorsMock.getUrl(), berthaRolesMock.getUrl())
-
-	err := bs.refreshMembershipCache()
+	bs, err := newBerthaService(berthaAuthorsMock.getUrl(), berthaRolesMock.getUrl())
 	assert.NotNil(t, err)
 
-	c, err := bs.getMembershipCount()
+	err = bs.refreshMembershipCache()
 	assert.NotNil(t, err)
-	assert.Equal(t, -1, c, "It should return -1")
 
-	uuids, err := bs.getMembershipUuids()
-	assert.NotNil(t, err)
+	c := bs.getMembershipCount()
+	assert.Equal(t, 0, c, "It should return 0")
+
+	uuids := bs.getMembershipUuids()
 	assert.Equal(t, 0, len(uuids), "It should return 0 UUIDs")
 
-	m, err := bs.getMembershipByUuid(membership1.UUID)
-	assert.NotNil(t, err)
+	m := bs.getMembershipByUuid(membership1.UUID)
 	assert.Equal(t, membership{}, m, "The membership should be empty")
 }
 
@@ -190,7 +183,8 @@ func TestCheckConnectivityOfHappyBertaAuthors(t *testing.T) {
 	berthaAuthorsMock.start("happy")
 	defer berthaAuthorsMock.stop()
 
-	bs := newBerthaService(berthaAuthorsMock.getUrl(), berthaRolesMock.getUrl())
+	bs, err := newBerthaService(berthaAuthorsMock.getUrl(), berthaRolesMock.getUrl())
+	assert.NotNil(t, err)
 
 	c := bs.checkAuthorsConnectivity()
 	assert.Nil(t, c)
@@ -200,7 +194,8 @@ func TestCheckConnectivityOfUnhappyBerthaAuthors(t *testing.T) {
 	berthaAuthorsMock.start("unhappy")
 	defer berthaAuthorsMock.stop()
 
-	bs := newBerthaService(berthaAuthorsMock.getUrl(), berthaRolesMock.getUrl())
+	bs, err := newBerthaService(berthaAuthorsMock.getUrl(), berthaRolesMock.getUrl())
+	assert.NotNil(t, err)
 
 	c := bs.checkAuthorsConnectivity()
 	assert.NotNil(t, c)
@@ -210,7 +205,8 @@ func TestCheckConnectivityOfHappyBertaRoles(t *testing.T) {
 	berthaRolesMock.start("happy")
 	defer berthaRolesMock.stop()
 
-	bs := newBerthaService(berthaAuthorsMock.getUrl(), berthaRolesMock.getUrl())
+	bs, err := newBerthaService(berthaAuthorsMock.getUrl(), berthaRolesMock.getUrl())
+	assert.NotNil(t, err)
 
 	c := bs.checkRolesConnectivity()
 	assert.Nil(t, c)
@@ -220,8 +216,8 @@ func TestCheckConnectivityOfUnhappyBerthaRoles(t *testing.T) {
 	berthaRolesMock.start("unhappy")
 	defer berthaRolesMock.stop()
 
-	bs := newBerthaService(berthaAuthorsMock.getUrl(), berthaRolesMock.getUrl())
-
+	bs, err := newBerthaService(berthaAuthorsMock.getUrl(), berthaRolesMock.getUrl())
+	assert.NotNil(t, err)
 	c := bs.checkRolesConnectivity()
 	assert.NotNil(t, c)
 }
@@ -230,7 +226,8 @@ func TestCheckConnectivityBerthaAuthorsOffline(t *testing.T) {
 	berthaRolesMock.start("happy")
 	defer berthaRolesMock.stop()
 
-	bs := newBerthaService(berthaAuthorsMock.getUrl(), berthaRolesMock.getUrl())
+	bs, err := newBerthaService(berthaAuthorsMock.getUrl(), berthaRolesMock.getUrl())
+	assert.NotNil(t, err)
 
 	c := bs.checkAuthorsConnectivity()
 	assert.NotNil(t, c)
@@ -240,7 +237,8 @@ func TestCheckConnectivityBerthaRolesOffline(t *testing.T) {
 	berthaAuthorsMock.start("happy")
 	defer berthaAuthorsMock.stop()
 
-	bs := newBerthaService(berthaAuthorsMock.getUrl(), berthaRolesMock.getUrl())
+	bs, err := newBerthaService(berthaAuthorsMock.getUrl(), berthaRolesMock.getUrl())
+	assert.NotNil(t, err)
 
 	c := bs.checkRolesConnectivity()
 	assert.NotNil(t, c)
