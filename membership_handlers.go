@@ -124,7 +124,7 @@ func writeJSONMessage(w http.ResponseWriter, errorMsg string, statusCode int) {
 func writeStreamResponse(ids []string, writer http.ResponseWriter) {
 	for _, id := range ids {
 		var buffer bytes.Buffer
-		buffer.WriteString(fmt.Sprintf(`{"id":"%s"} `, id))
+		buffer.WriteString(fmt.Sprintf("{\"id\":\"%s\"}\n", id))
 		buffer.WriteTo(writer)
 	}
 }
