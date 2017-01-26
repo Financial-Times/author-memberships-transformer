@@ -18,7 +18,7 @@ var curatedAuthorsMembershipTransformer *httptest.Server
 //For fixtures see fixtures_test.go
 
 var uuids = []string{expectedMembershipUUID, "e06be0f8-0426-4ee8-80e3-3da37255818a"}
-var expectedStreamOutput = `{"id":"` + expectedMembershipUUID + `"} {"id":"e06be0f8-0426-4ee8-80e3-3da37255818a"} `
+var expectedStreamOutput = "{\"id\":\"" + expectedMembershipUUID + "\"}\n{\"id\":\"e06be0f8-0426-4ee8-80e3-3da37255818a\"}\n"
 
 type MockedBerthaService struct {
 	mock.Mock
