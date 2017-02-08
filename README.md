@@ -1,6 +1,6 @@
 # curated-authors-memberships-transformer
 
-[![CircleCI](https://circleci.com/gh/Financial-Times/curated-authors-memberships-transformer.svg?style=svg)](https://circleci.com/gh/Financial-Times/curated-authors-memberships-transformer)
+[![CircleCI](https://circleci.com/gh/Financial-Times/curated-authors-memberships-transformer.svg?style=svg)](https://circleci.com/gh/Financial-Times/curated-authors-memberships-transformer) [![Coverage Status](https://coveralls.io/repos/github/Financial-Times/curated-authors-memberships-transformer/badge.svg?branch=master)](https://coveralls.io/github/Financial-Times/curated-authors-memberships-transformer?branch=master)
 
 Retrieves author data curated by editorial people and transforms it to People Memberships according to UP JSON model.
 The service exposes endpoints for getting all the curated authors' membership UUIDs and for getting memberships by uuid.
