@@ -105,7 +105,7 @@ func TestShouldReturn200WhenMembershipCacheIsRefreshed(t *testing.T) {
 	startCuratedAuthorsMembershipTransformer(mbs)
 	defer curatedAuthorsMembershipTransformer.Close()
 
-	resp, err := http.Post(curatedAuthorsMembershipTransformer.URL+"/transformers/memberships", "", nil)
+	resp, err := http.Post(curatedAuthorsMembershipTransformer.URL+"/transformers/memberships/__reload", "", nil)
 	if err != nil {
 		panic(err)
 	}
@@ -183,7 +183,7 @@ func TestShouldReturn500WhenCacheRefreshReturnsError(t *testing.T) {
 	startCuratedAuthorsMembershipTransformer(mbs)
 	defer curatedAuthorsMembershipTransformer.Close()
 
-	resp, err := http.Post(curatedAuthorsMembershipTransformer.URL+"/transformers/memberships", "", nil)
+	resp, err := http.Post(curatedAuthorsMembershipTransformer.URL+"/transformers/memberships/__reload", "", nil)
 	if err != nil {
 		panic(err)
 	}
