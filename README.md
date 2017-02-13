@@ -91,7 +91,13 @@ This output data will be consumed as a stream by the [concept publisher](https:/
 A response example is provided below.
 
 ```
-{"id":"5baaf5a4-2d9f-11e6-a100-1316a778acd2"} {"id":"5baaf5a4-2d9f-11e6-a100-1316a778acd5"} {"id":"5baaf5a4-2d9f-11e6-a100-1316a778acd9"} {"id":"5baaf5a4-2d9f-11e6-a100-1316a778acd8"} {"id":"5baaf5a4-2d9f-11e6-a100-1316a778acd0"} {"id":"daf5fed2-013c-468d-85c4-aee779b8aa53"} {"id":"daf5fed2-013c-468d-85c4-aee779b8aa51"}
+{"id":"5baaf5a4-2d9f-11e6-a100-1316a778acd2"}
+{"id":"5baaf5a4-2d9f-11e6-a100-1316a778acd5"}
+{"id":"5baaf5a4-2d9f-11e6-a100-1316a778acd9"}
+{"id":"5baaf5a4-2d9f-11e6-a100-1316a778acd8"}
+{"id":"5baaf5a4-2d9f-11e6-a100-1316a778acd0"}
+{"id":"daf5fed2-013c-468d-85c4-aee779b8aa53"}
+{"id":"daf5fed2-013c-468d-85c4-aee779b8aa51"}
 ```
 
 ##Membership by UUID
