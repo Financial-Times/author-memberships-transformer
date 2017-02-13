@@ -73,7 +73,7 @@ $GOPATH/bin/curated-authors-memberships-transformer
 #Endpoints
 
 ##Refresh Cache
-`POST /transformers/memberships` with empty request message refreshes the transformer cache.
+`POST /transformers/memberships/__reload` with empty request message refreshes the transformer cache.
 The transformer loads Bertha data in memory at startup time by default. Every time a POST triggers this endpoint, the transformer refetches Bertha data.
 
 ##Count
