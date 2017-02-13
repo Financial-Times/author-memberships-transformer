@@ -73,7 +73,7 @@ $GOPATH/bin/curated-authors-memberships-transformer
 #Endpoints
 
 ##Refresh Cache
-`POST /transformers/memberships` with empty request message refreshes the transformer cache.
+`POST /transformers/memberships/__reload` with empty request message refreshes the transformer cache.
 The transformer loads Bertha data in memory at startup time by default. Every time a POST triggers this endpoint, the transformer refetches Bertha data.
 
 ##Count
@@ -91,7 +91,13 @@ This output data will be consumed as a stream by the [concept publisher](https:/
 A response example is provided below.
 
 ```
-{"id":"5baaf5a4-2d9f-11e6-a100-1316a778acd2"} {"id":"5baaf5a4-2d9f-11e6-a100-1316a778acd5"} {"id":"5baaf5a4-2d9f-11e6-a100-1316a778acd9"} {"id":"5baaf5a4-2d9f-11e6-a100-1316a778acd8"} {"id":"5baaf5a4-2d9f-11e6-a100-1316a778acd0"} {"id":"daf5fed2-013c-468d-85c4-aee779b8aa53"} {"id":"daf5fed2-013c-468d-85c4-aee779b8aa51"}
+{"id":"5baaf5a4-2d9f-11e6-a100-1316a778acd2"}
+{"id":"5baaf5a4-2d9f-11e6-a100-1316a778acd5"}
+{"id":"5baaf5a4-2d9f-11e6-a100-1316a778acd9"}
+{"id":"5baaf5a4-2d9f-11e6-a100-1316a778acd8"}
+{"id":"5baaf5a4-2d9f-11e6-a100-1316a778acd0"}
+{"id":"daf5fed2-013c-468d-85c4-aee779b8aa53"}
+{"id":"daf5fed2-013c-468d-85c4-aee779b8aa51"}
 ```
 
 ##Membership by UUID
