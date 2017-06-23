@@ -1,0 +1,15 @@
+# Default values for curated-authors-memberships-transformer.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+service:
+  name: "" # The name of the service, should be defined in the specific app-configs folder.
+  hasHealthcheck: "true"
+image:
+  repository: coco/curated-authors-memberships-transformer
+  version: "" # should be set explicitly at installation
+  pullPolicy: IfNotPresent
+resources:
+  limits:
+    memory: 256Mi
+
+
