@@ -11,5 +11,6 @@ image:
 resources:
   limits:
     memory: 256Mi
-
-
+env:
+  BERTHA_AUTHORS_SOURCE_URL: "" #This should be defined in the specific app-configs folder.
+  BERTHA_ROLES_SOURCE_URL: "" #This should be defined in the specific app-configs folder.

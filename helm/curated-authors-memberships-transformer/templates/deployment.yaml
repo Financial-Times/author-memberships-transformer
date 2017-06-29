@@ -25,9 +25,9 @@ spec:
         - name: PORT
           value: "8080"
         - name: BERTHA_AUTHORS_SOURCE_URL
-          value: "http://bertha.ig.ft.com/view/publish/gss/1wEdVRLtayZ6-XBfYM3vKAGaOV64cNJD3L8MlLM8-uFY/TestAuthors"
+          value: {{ .Values.env.BERTHA_AUTHORS_SOURCE_URL }}
         - name: BERTHA_ROLES_SOURCE_URL
-          value: "http://bertha.ig.ft.com/view/publish/gss/1wEdVRLtayZ6-XBfYM3vKAGaOV64cNJD3L8MlLM8-uFY/TestRoles"
+          value: {{ .Values.env.BERTHA_ROLES_SOURCE_URL }}
         ports: 
         - containerPort: 8080 
         livenessProbe: 

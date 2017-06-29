@@ -2,3 +2,6 @@
 replicaCount: 1
 service:
   name: curated-authors-memberships-transformer
+env:
+  BERTHA_AUTHORS_SOURCE_URL: "http://bertha.ig.ft.com/view/publish/gss/1wEdVRLtayZ6-XBfYM3vKAGaOV64cNJD3L8MlLM8-uFY/TestAuthors"
+  BERTHA_ROLES_SOURCE_URL: "http://bertha.ig.ft.com/view/publish/gss/1wEdVRLtayZ6-XBfYM3vKAGaOV64cNJD3L8MlLM8-uFY/TestRoles"
