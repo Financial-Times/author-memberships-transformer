@@ -1,0 +1,4 @@
+apiVersion: v1
+description: curated-authors-memberships-transformer Helm chart for Kubernetes
+name: curated-authors-memberships-transformer
+version: 0.0.0  # this entry can be left untouched as it is automatically handled by Jenkins pipeline
