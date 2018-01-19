@@ -13,6 +13,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/jawher/mow.cli"
 	"github.com/rcrowley/go-metrics"
+	"time"
 )
 
 func main() {
@@ -73,6 +74,7 @@ func setupServiceHandlers(mh membershipHandler) http.Handler {
 			Description: "A REST service that transforms Authors data from Bertha to Memberships according to UPP format.",
 			Checks: []fthealth.Check {mh.AuthorsHealthCheck(), mh.RolesHealthCheck()},
 		},
+		Timeout: 10 * time.Second,
 	}
 
 	r.HandleFunc("/__health", fthealth.Handler(timedHC))
