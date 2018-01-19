@@ -1,4 +1,4 @@
-FROM alpine:3.3
+FROM golang:1.8-alpine
 
 ADD *.go .git /curated-authors-memberships-transformer/
 
