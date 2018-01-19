@@ -7,9 +7,10 @@ import (
 	"net/http"
 	"reflect"
 
-	"github.com/Financial-Times/go-fthealth/v1a"
+	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
 	log "github.com/sirupsen/logrus"
 	"github.com/gorilla/mux"
+	"github.com/Financial-Times/service-status-go/gtg"
 )
 
 type membershipHandler struct {
@@ -55,8 +56,8 @@ func (mh *membershipHandler) getMembershipByUuid(writer http.ResponseWriter, req
 	writeJSONResponse(m, !reflect.DeepEqual(m, membership{}), writer)
 }
 
-func (mh *membershipHandler) AuthorsHealthCheck() v1a.Check {
-	return v1a.Check{
+func (mh *membershipHandler) AuthorsHealthCheck() fthealth.Check {
+	return fthealth.Check{
 		BusinessImpact:   "Unable to respond to request for curated author data from Bertha",
 		Name:             "Check connectivity to Bertha Authors Spreadsheet",
 		PanicGuide:       "https://sites.google.com/a/ft.com/ft-technology-service-transition/home/run-book-library/curated-authors-memberships-transformer",
@@ -74,8 +75,8 @@ func (mh *membershipHandler) authorsChecker() (string, error) {
 	return "Error connecting to Bertha Authors", err
 }
 
-func (mh *membershipHandler) RolesHealthCheck() v1a.Check {
-	return v1a.Check{
+func (mh *membershipHandler) RolesHealthCheck() fthealth.Check {
+	return fthealth.Check{
 		BusinessImpact:   "Unable to respond to request for curated author roles data from Bertha",
 		Name:             "Check connectivity to Bertha Roles Spreadsheet",
 		PanicGuide:       "https://sites.google.com/a/ft.com/ft-technology-service-transition/home/run-book-library/curated-authors-memberships-transfomer",
@@ -93,10 +94,19 @@ func (mh *membershipHandler) rolesChecker() (string, error) {
 	return "Error connecting to Bertha Authors", err
 }
 
-func (mh *membershipHandler) GoodToGo(writer http.ResponseWriter, req *http.Request) {
-	if _, err := mh.authorsChecker(); err != nil {
-		writer.WriteHeader(http.StatusServiceUnavailable)
+func (mh *membershipHandler) GTG() gtg.Status {
+	statusCheck := func() gtg.Status {
+		return gtgCheck(mh.rolesChecker)
 	}
+
+	return gtg.FailFastParallelCheck([]gtg.StatusChecker{statusCheck})()
+}
+
+func gtgCheck(handler func() (string, error)) gtg.Status {
+	if _, err := handler(); err != nil {
+		return gtg.Status{GoodToGo: false, Message: err.Error()}
+	}
+	return gtg.Status{GoodToGo: true}
 }
 
 func writeJSONResponse(obj interface{}, found bool, writer http.ResponseWriter) {

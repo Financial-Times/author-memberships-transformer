@@ -41,6 +41,8 @@ func (bs *berthaService) refreshMembershipCache() error {
 		return authErr
 	}
 
+	defer authResp.Body.Close()
+
 	var authors []author
 	if err := json.NewDecoder(authResp.Body).Decode(&authors); err != nil {
 		log.Error(err)
@@ -52,6 +54,8 @@ func (bs *berthaService) refreshMembershipCache() error {
 		log.Error(rolesErr)
 		return rolesErr
 	}
+
+	defer rolesResp.Body.Close()
 
 	var roles []berthaRole
 	if err := json.NewDecoder(rolesResp.Body).Decode(&roles); err != nil {
@@ -127,6 +131,7 @@ func (bs *berthaService) checkConnectivity(url string) error {
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		return errors.New(fmt.Sprintf("Bertha returns unexpected HTTP status: %d", resp.StatusCode))
 	}

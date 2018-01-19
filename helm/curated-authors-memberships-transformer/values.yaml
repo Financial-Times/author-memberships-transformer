@@ -9,7 +9,7 @@ image:
   repository: coco/curated-authors-memberships-transformer
   pullPolicy: IfNotPresent
 resources:
+  requests:
+    memory: 16Mi
   limits:
-    memory: 256Mi
-
-
+    memory: 64Mi

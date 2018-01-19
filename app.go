@@ -6,7 +6,7 @@ import (
 	_ "net/http/pprof"
 	"os"
 
-	"github.com/Financial-Times/go-fthealth/v1a"
+	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
 	"github.com/Financial-Times/http-handlers-go/httphandlers"
 	status "github.com/Financial-Times/service-status-go/httphandlers"
 	log "github.com/sirupsen/logrus"
@@ -66,12 +66,21 @@ func main() {
 func setupServiceHandlers(mh membershipHandler) http.Handler {
 	r := mux.NewRouter()
 
+	timedHC := fthealth.TimedHealthCheck{
+		HealthCheck: fthealth.HealthCheck{
+			SystemCode: "curated-authors-memberships-tf",
+			Name: "Curated Authors Memberships Transformer",
+			Description: "A REST service that transforms Authors data from Bertha to Memberships according to UPP format.",
+			Checks: []fthealth.Check {mh.AuthorsHealthCheck(), mh.RolesHealthCheck()},
+		},
+	}
+
+	r.HandleFunc("/__health", fthealth.Handler(timedHC))
 	r.HandleFunc(status.PingPath, status.PingHandler)
 	r.HandleFunc(status.PingPathDW, status.PingHandler)
 	r.HandleFunc(status.BuildInfoPath, status.BuildInfoHandler)
 	r.HandleFunc(status.BuildInfoPathDW, status.BuildInfoHandler)
-	r.HandleFunc("/__health", v1a.Handler("Curated Authors Membership Transformer", "Checks for accessing Bertha", mh.AuthorsHealthCheck(), mh.RolesHealthCheck()))
-	r.HandleFunc(status.GTGPath, mh.GoodToGo)
+	r.HandleFunc(status.GTGPath, status.NewGoodToGoHandler(mh.GTG))
 
 	r.HandleFunc("/transformers/memberships/__reload", mh.refreshMembershipCache).Methods("POST")
 	r.HandleFunc("/transformers/memberships/__count", mh.getMembershipsCount).Methods("GET")
