@@ -17,6 +17,8 @@ RUN apk --update add git go \
   && mkdir -p $GOPATH/src/${REPO_PATH} \
   && mv * $GOPATH/src/${REPO_PATH} \
   && cd $GOPATH/src/${REPO_PATH} \
+  && go get -u github.com/kardianos/govendor \
+  && $GOPATH/bin/govendor sync \
   && go get -t ./... \
   && go build -ldflags="${LDFLAGS}" \
   && mv curated-authors-memberships-transformer /curated-authors-memberships-transformer-app \
