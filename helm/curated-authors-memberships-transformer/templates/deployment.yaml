@@ -27,13 +27,13 @@ spec:
         env:
         - name: BERTHA_AUTHORS_SOURCE_URL
           valueFrom:
-            configMapKeyRef:
-              name: global-config
+            secretKeyRef:
+              name: global-secrets
               key: bertha.authors.url
         - name: BERTHA_ROLES_SOURCE_URL
           valueFrom:
-            configMapKeyRef:
-              name: global-config
+            secretKeyRef:
+              name: global-secrets
               key: bertha.roles.url
         ports:
         - containerPort: 8080
