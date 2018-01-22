@@ -60,7 +60,7 @@ func (mh *membershipHandler) AuthorsHealthCheck() fthealth.Check {
 	return fthealth.Check{
 		BusinessImpact:   "Unable to respond to request for curated author data from Bertha",
 		Name:             "Check connectivity to Bertha Authors Spreadsheet",
-		PanicGuide:       "https://sites.google.com/a/ft.com/ft-technology-service-transition/home/run-book-library/curated-authors-memberships-transformer",
+		PanicGuide:       "https://dewey.in.ft.com/view/system/curated-authors-memberships-tf",
 		Severity:         1,
 		TechnicalSummary: "Cannot connect to Bertha to be able to supply curated authors information",
 		Checker:          mh.authorsChecker,
@@ -79,7 +79,7 @@ func (mh *membershipHandler) RolesHealthCheck() fthealth.Check {
 	return fthealth.Check{
 		BusinessImpact:   "Unable to respond to request for curated author roles data from Bertha",
 		Name:             "Check connectivity to Bertha Roles Spreadsheet",
-		PanicGuide:       "https://sites.google.com/a/ft.com/ft-technology-service-transition/home/run-book-library/curated-authors-memberships-transfomer",
+		PanicGuide:       "https://dewey.in.ft.com/view/system/curated-authors-memberships-tf",
 		Severity:         1,
 		TechnicalSummary: "Cannot connect to Bertha to be able to supply author roles",
 		Checker:          mh.rolesChecker,
@@ -95,11 +95,15 @@ func (mh *membershipHandler) rolesChecker() (string, error) {
 }
 
 func (mh *membershipHandler) GTG() gtg.Status {
-	statusCheck := func() gtg.Status {
+	rolesStatusCheck := func() gtg.Status {
 		return gtgCheck(mh.rolesChecker)
 	}
 
-	return gtg.FailFastParallelCheck([]gtg.StatusChecker{statusCheck})()
+	authorsStatusCheck := func() gtg.Status {
+		return gtgCheck(mh.authorsChecker)
+	}
+
+	return gtg.FailFastParallelCheck([]gtg.StatusChecker{rolesStatusCheck, authorsStatusCheck})()
 }
 
 func gtgCheck(handler func() (string, error)) gtg.Status {
