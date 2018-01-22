@@ -5,15 +5,15 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"os"
+	"time"
 
 	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
 	"github.com/Financial-Times/http-handlers-go/httphandlers"
 	status "github.com/Financial-Times/service-status-go/httphandlers"
-	log "github.com/sirupsen/logrus"
 	"github.com/gorilla/mux"
 	"github.com/jawher/mow.cli"
 	"github.com/rcrowley/go-metrics"
-	"time"
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {
@@ -69,10 +69,10 @@ func setupServiceHandlers(mh membershipHandler) http.Handler {
 
 	timedHC := fthealth.TimedHealthCheck{
 		HealthCheck: fthealth.HealthCheck{
-			SystemCode: "curated-authors-memberships-tf",
-			Name: "Curated Authors Memberships Transformer",
+			SystemCode:  "curated-authors-memberships-tf",
+			Name:        "Curated Authors Memberships Transformer",
 			Description: "A REST service that transforms Authors data from Bertha to Memberships according to UPP format.",
-			Checks: []fthealth.Check {mh.AuthorsHealthCheck(), mh.RolesHealthCheck()},
+			Checks:      []fthealth.Check{mh.AuthorsHealthCheck(), mh.RolesHealthCheck()},
 		},
 		Timeout: 10 * time.Second,
 	}

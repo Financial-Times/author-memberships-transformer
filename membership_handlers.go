@@ -8,9 +8,9 @@ import (
 	"reflect"
 
 	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
-	log "github.com/sirupsen/logrus"
-	"github.com/gorilla/mux"
 	"github.com/Financial-Times/service-status-go/gtg"
+	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
 )
 
 type membershipHandler struct {

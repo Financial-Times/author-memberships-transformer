@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	log "github.com/sirupsen/logrus"
-	"github.com/gregjones/httpcache"
 	"net/http"
 	"sync"
+
+	"github.com/gregjones/httpcache"
+	log "github.com/sirupsen/logrus"
 )
 
 var client = httpcache.NewMemoryCacheTransport().Client()
