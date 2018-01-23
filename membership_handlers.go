@@ -7,9 +7,10 @@ import (
 	"net/http"
 	"reflect"
 
-	"github.com/Financial-Times/go-fthealth/v1a"
-	log "github.com/sirupsen/logrus"
+	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
+	"github.com/Financial-Times/service-status-go/gtg"
 	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
 )
 
 type membershipHandler struct {
@@ -55,11 +56,11 @@ func (mh *membershipHandler) getMembershipByUuid(writer http.ResponseWriter, req
 	writeJSONResponse(m, !reflect.DeepEqual(m, membership{}), writer)
 }
 
-func (mh *membershipHandler) AuthorsHealthCheck() v1a.Check {
-	return v1a.Check{
+func (mh *membershipHandler) AuthorsHealthCheck() fthealth.Check {
+	return fthealth.Check{
 		BusinessImpact:   "Unable to respond to request for curated author data from Bertha",
 		Name:             "Check connectivity to Bertha Authors Spreadsheet",
-		PanicGuide:       "https://sites.google.com/a/ft.com/ft-technology-service-transition/home/run-book-library/curated-authors-memberships-transformer",
+		PanicGuide:       "https://dewey.in.ft.com/view/system/curated-authors-memberships-tf",
 		Severity:         1,
 		TechnicalSummary: "Cannot connect to Bertha to be able to supply curated authors information",
 		Checker:          mh.authorsChecker,
@@ -74,11 +75,11 @@ func (mh *membershipHandler) authorsChecker() (string, error) {
 	return "Error connecting to Bertha Authors", err
 }
 
-func (mh *membershipHandler) RolesHealthCheck() v1a.Check {
-	return v1a.Check{
+func (mh *membershipHandler) RolesHealthCheck() fthealth.Check {
+	return fthealth.Check{
 		BusinessImpact:   "Unable to respond to request for curated author roles data from Bertha",
 		Name:             "Check connectivity to Bertha Roles Spreadsheet",
-		PanicGuide:       "https://sites.google.com/a/ft.com/ft-technology-service-transition/home/run-book-library/curated-authors-memberships-transfomer",
+		PanicGuide:       "https://dewey.in.ft.com/view/system/curated-authors-memberships-tf",
 		Severity:         1,
 		TechnicalSummary: "Cannot connect to Bertha to be able to supply author roles",
 		Checker:          mh.rolesChecker,
@@ -93,10 +94,23 @@ func (mh *membershipHandler) rolesChecker() (string, error) {
 	return "Error connecting to Bertha Authors", err
 }
 
-func (mh *membershipHandler) GoodToGo(writer http.ResponseWriter, req *http.Request) {
-	if _, err := mh.authorsChecker(); err != nil {
-		writer.WriteHeader(http.StatusServiceUnavailable)
+func (mh *membershipHandler) GTG() gtg.Status {
+	rolesStatusCheck := func() gtg.Status {
+		return gtgCheck(mh.rolesChecker)
 	}
+
+	authorsStatusCheck := func() gtg.Status {
+		return gtgCheck(mh.authorsChecker)
+	}
+
+	return gtg.FailFastParallelCheck([]gtg.StatusChecker{rolesStatusCheck, authorsStatusCheck})()
+}
+
+func gtgCheck(handler func() (string, error)) gtg.Status {
+	if _, err := handler(); err != nil {
+		return gtg.Status{GoodToGo: false, Message: err.Error()}
+	}
+	return gtg.Status{GoodToGo: true}
 }
 
 func writeJSONResponse(obj interface{}, found bool, writer http.ResponseWriter) {
