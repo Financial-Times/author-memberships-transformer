@@ -1,4 +1,4 @@
-# curated-authors-memberships-transformer
+# curated-authors-memberships-transformer [RETIRED]
 
 [![CircleCI](https://circleci.com/gh/Financial-Times/curated-authors-memberships-transformer.svg?style=svg)](https://circleci.com/gh/Financial-Times/curated-authors-memberships-transformer) [![Coverage Status](https://coveralls.io/repos/github/Financial-Times/curated-authors-memberships-transformer/badge.svg?branch=master)](https://coveralls.io/github/Financial-Times/curated-authors-memberships-transformer?branch=master)
 
